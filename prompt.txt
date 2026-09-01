@@ -1,0 +1,343 @@
+================================================================================
+MERN TEAM COLLABORATION PLATFORM: COMPLETE BLUEPRINT & BACKEND SPECIFICATION
+(Zero-Cost MS Teams + Jira Alternative)
+
+TABLE OF CONTENTS:
+
+System Overview & Zero-Budget Strategy
+
+Master Architecture & Request Lifecycle
+
+Complete Database Data Models (Mongoose Schemas)
+
+Topic-by-Topic Backend Roadmap & Conceptual Guide
+
+Stage 1: Server Setup & Configuration
+
+Stage 2: Express Middlewares Pipeline
+
+Stage 3: Database Models & Hooks
+
+Stage 4: Controllers & API Endpoints
+
+Stage 5: Native Real-Time WebSockets (Socket.io)
+
+Analytics Engine & Performance Metrics
+
+Sequential Step-by-Step AI Execution Prompts
+
+================================================================================
+
+SYSTEM OVERVIEW & ZERO-BUDGET STRATEGY
+================================================================================
+Target Platform: Real-time team collaboration system featuring:
+• User ID / Tag-based member invitation and removal (RBAC: Admin / Member).
+• Channels & direct personal messaging (1-on-1 DMs).
+• Project workspaces with subtasks, priority levels, and deadlines.
+• Performance analytics dashboards (Team completion rate, member workloads).
+
+Zero-Cost Infrastructure Stack:
+• Database: MongoDB Atlas (M0 Free Tier - 512MB storage).
+• Backend API & Sockets: Node.js / Express hosted on Render/Railway/Fly.io (Free Tier).
+• Frontend: React + Tailwind CSS hosted on Vercel / Netlify (Free Tier).
+• Real-Time Transport: Native Socket.io (zero third-party paid services like Pusher/Ably).
+
+================================================================================
+2. MASTER ARCHITECTURE & REQUEST LIFECYCLE
+
+Incoming Client HTTP Request
+│
+▼
+┌────────────────────────────────────────────────────────┐
+│ Global Middleware Pipeline                             │
+│   • cors() : Enables cross-origin client communication │
+│   • express.json() : Parses incoming JSON bodies       │
+│   • requestLogger : Request logging for debugging      │
+└───────────┬────────────────────────────────────────────┘
+│
+▼
+┌────────────────────────────────────────────────────────┐
+│ Route Routing & Multiplexing                           │
+│   • /api/auth     • /api/teams                         │
+│   • /api/projects • /api/analytics                     │
+└───────────┬────────────────────────────────────────────┘
+│
+▼
+┌────────────────────────────────────────────────────────┐
+│ Route-Specific Middlewares                             │
+│   • auth.middleware.js : Verifies Bearer JWT token     │
+│   • rbac.middleware.js : Checks Team Admin permissions │
+└───────────┬────────────────────────────────────────────┘
+│
+▼
+┌────────────────────────────────────────────────────────┐
+│ Controller Business Logic                              │
+│   • Input validation & sanity checks                   │
+│   • Mongoose CRUD operations & Aggregation pipelines   │
+└───────────┬────────────────────────────────────────────┘
+│
+▼
+┌────────────────────────────────────────────────────────┐
+│ Centralized Error Handler Middleware                   │
+│   • Catches async rejections                           │
+│   • Formats standard JSON response structure           │
+└────────────────────────────────────────────────────────┘
+
+================================================================================
+3. COMPLETE DATABASE DATA MODELS (MONGOOSE SCHEMAS)
+
+User Model (User.js)
+• _id: ObjectId
+• name: String (Required)
+• email: String (Unique, Required)
+• username: String (Unique handle/ID for direct invites, e.g., "alex_dev" or "user_102")
+• password: String (Hashed with bcrypt in pre-save hook)
+• avatarColor: String (Hex code for fallback avatar)
+• createdAt: Date
+
+Team Model (Team.js)
+• _id: ObjectId
+• name: String (Required)
+• description: String
+• admin: ObjectId (Ref: User)
+• members: [
+{
+user: ObjectId (Ref: User),
+role: String (Enum: ['Admin', 'Member'], Default: 'Member'),
+joinedAt: Date
+}
+]
+• createdAt: Date
+
+Project & Subtask Model (Project.js)
+• _id: ObjectId
+• teamId: ObjectId (Ref: Team, Indexed)
+• title: String (Required)
+• description: String
+• createdBy: ObjectId (Ref: User)
+• deadline: Date
+• subtasks: [
+{
+_id: ObjectId,
+title: String (Required),
+assignedTo: ObjectId (Ref: User, Nullable),
+priority: String (Enum: ['Low', 'Medium', 'High', 'Urgent'], Default: 'Medium'),
+status: String (Enum: ['To Do', 'In Progress', 'Completed'], Default: 'To Do'),
+deadline: Date,
+completedAt: Date
+}
+]
+• createdAt: Date
+
+Message Model (Message.js)
+• _id: ObjectId
+• teamId: ObjectId (Ref: Team, Indexed)
+• sender: ObjectId (Ref: User, Required)
+• recipient: ObjectId (Ref: User, Null if public channel message)
+• content: String (Required)
+• createdAt: Date (Indexed for chronological streaming)
+
+================================================================================
+4. TOPIC-BY-TOPIC BACKEND ROADMAP & CONCEPTUAL GUIDE
+
+STAGE 1: Server Setup & Configuration
+
+• Topic 1.1: Express Setup & Environment Isolation
+
+Core Modules: express, dotenv, cors.
+
+Role: Encapsulates database connection strings and JWT secrets within .env
+to prevent credentials exposure in Git repositories.
+
+• Topic 1.2: MongoDB Connection Resilience
+
+Core Module: config/db.js.
+
+Role: Establishes a persistent Mongoose connection with lifecycle event
+listeners (connected, error, disconnected).
+
+STAGE 2: Express Middlewares Pipeline
+
+Middlewares execute sequentially in the request-response cycle before the
+controller executes.
+
+• Topic 2.1: Authentication Middleware (auth.middleware.js)
+
+Operation: Intercepts the "Authorization: Bearer " header, decodes
+the token with jwt.verify(), queries user data, and binds it to req.user.
+
+Benefit: Eliminates repetitive authentication logic across secure routes.
+
+• Topic 2.2: RBAC & Team Membership Middleware (rbac.middleware.js)
+
+Operation: Inspects req.params.teamId to verify that req.user._id matches
+the admin ID or an authorized member role for that specific team.
+
+Benefit: Enforces boundary controls so regular members cannot remove
+colleagues or delete projects.
+
+• Topic 2.3: Centralized Error Handler (error.middleware.js)
+
+Operation: A 4-parameter function (err, req, res, next) placed as the final
+Express layer.
+
+Benefit: Catches unhandled async promise rejections and standardizes API
+error payloads:
+{ "success": false, "message": "...", "error": "..." }
+
+STAGE 3: Database Models & Lifecycle Hooks
+
+• Topic 3.1: Password Hashing Hooks (bcrypt)
+
+Pre-save hook automatically triggers when user.password is modified,
+ensuring unhashed plain-text passwords never reach storage.
+
+• Topic 3.2: Embedding vs. Referencing
+
+Projects embed Subtasks for atomic updates and fast read operations.
+
+Users and Teams use References (ObjectId) to prevent document bloat and
+maintain data normalization.
+
+STAGE 4: Controllers & API Endpoints
+
+• Topic 4.1: Authentication Endpoints
+
+POST /api/auth/register : Registers account, verifies unique username/ID.
+
+POST /api/auth/login    : Authenticates credentials, returns signed JWT.
+
+GET  /api/auth/me       : Returns current authenticated session details.
+
+• Topic 4.2: Team & User ID Member Management Endpoints
+
+POST   /api/teams                        : Creates workspace with creator as Admin.
+
+POST   /api/teams/:teamId/members        : Queries User.findOne({ username }) and adds to team.
+
+DELETE /api/teams/:teamId/members/:userId : Removes user from team and clears task assignments.
+
+• Topic 4.3: Project & Subtask Workflows
+
+POST  /api/teams/:teamId/projects           : Instantiates a project container.
+
+POST  /api/projects/:projectId/subtasks     : Inserts subtask into project array.
+
+PATCH /api/projects/:projectId/subtasks/:id : Modifies status and logs completedAt.
+
+STAGE 5: Native Real-Time WebSockets (Socket.io)
+
+• Topic 5.1: Socket Handshake Authentication
+
+Middleware inside io.use() validates the JWT token before allowing
+the client connection.
+
+• Topic 5.2: Room Isolation & Events
+
+socket.join(teamId) : Broadcasts team announcements, project updates, and group chat.
+
+socket.join(userId) : Routes personal 1-on-1 private direct messages.
+
+================================================================================
+5. ANALYTICS ENGINE & PERFORMANCE METRICS
+
+MongoDB Aggregation Pipelines compute efficiency metrics without client-side overhead:
+
+Team Completion Rate (%):
+Formula: (Total Completed Subtasks / Total Subtasks) * 100
+
+Workload Distribution per Member:
+Calculates assigned subtasks count vs. completed subtasks count grouped by user ID.
+
+Overdue Subtask Tracking:
+Filter: status != "Completed" AND deadline < Current Date
+
+================================================================================
+6. SEQUENTIAL STEP-BY-STEP AI EXECUTION PROMPTS
+
+PROMPT 1: Server Setup & Express Middlewares
+
+We are building the backend for a zero-cost MERN team collaboration platform (like MS Teams + Jira).
+Start by creating the backend foundation:
+
+Initialize the Express server (server.js) with dotenv, cors, and express.json().
+
+Create the MongoDB connection module (config/db.js) using Mongoose.
+
+Create the core middlewares in /middlewares:
+
+auth.middleware.js: Explain why and how it extracts the Bearer token, verifies JWT, and sets req.user.
+
+error.middleware.js: Explain why global error handling middleware has 4 arguments (err, req, res, next) and formats all API error responses.
+Provide clean, commented code and explain the purpose of each middleware before writing it.
+
+PROMPT 2: Mongoose Data Models & Virtuals
+
+Now let's build the database schemas in /models:
+
+User.js: Include name, email, unique username/ID (for easy invites), password (with bcrypt pre-save hash hook), avatarColor.
+
+Team.js: Include name, description, admin (ObjectId ref User), and members array (user ref, role enum ['Admin', 'Member'], joinedAt).
+
+Project.js: Embedded subtaskSchema (title, assignedTo ref User, priority ['Low', 'Medium', 'High', 'Urgent'], status ['To Do', 'In Progress', 'Completed'], deadline, completedAt) and project fields (teamId, title, deadline, createdBy).
+
+Message.js: teamId, sender, recipient (null for public channel, user ObjectId for DMs), content.
+Explain the use of ObjectId references vs embedded schemas for subtasks.
+
+PROMPT 3: Auth & User ID Member Management Controllers
+
+Now let's implement the Controllers and Routes for Auth and Member Management:
+
+auth.controller.js & auth.routes.js:
+
+Registration with automatic unique ID verification.
+
+Login with bcrypt comparison and JWT issuance.
+
+GET /api/auth/me protected by auth middleware.
+
+team.controller.js & team.routes.js:
+
+Create team (sets creator as Admin).
+
+Add member by User ID / username: Queries User.findOne({ username }) and pushes to team.members.
+
+Remove member: Removes from team and unassigns any active subtasks.
+
+RBAC middleware: Verify if req.user is an Admin of the team before permitting member addition or removal.
+Explain the step-by-step logic and error handling inside each controller.
+
+PROMPT 4: Project, Subtasks & MongoDB Analytics Aggregations
+
+Let's build the Project & Task Management and Analytics engine:
+
+project.controller.js & project.routes.js:
+
+CRUD for projects.
+
+Add subtask, assign member, update status, track completedAt.
+
+analytics.controller.js & analytics.routes.js:
+
+GET /api/teams/:teamId/stats: Uses MongoDB aggregation to calculate team completion rate %, per-member assigned vs completed tasks, and overdue task count.
+
+GET /api/teams/:teamId/my-stats: Computes personal metrics for the logged-in user.
+Explain how the MongoDB aggregation pipelines ($unwind,$match, $group,$project) work for these calculations.
+
+PROMPT 5: Native Socket.io Real-Time Setup
+
+Let's add the real-time layer using native Socket.io inside the Express backend:
+
+Socket authentication middleware to parse and verify the JWT handshake.
+
+Room management: Joining team channels (teamId) and private user rooms (userId).
+
+Event handlers:
+
+Public team chat message broadcast.
+
+Private 1-on-1 direct messaging.
+
+Live task update broadcast (so board updates instantly without refresh).
+Explain how Socket.io rooms work and why this setup stays 100% free with no external services.
+================================================================================
