@@ -1,8 +1,15 @@
 # Dependencies
 node_modules/
+client/node_modules/
+server/node_modules/
+
+# Production builds
+client/dist/
 
 # Environment variables
 .env
+server/.env
+client/.env
 
 # Logs
 *.log

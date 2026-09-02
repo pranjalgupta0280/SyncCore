@@ -1,23 +1,14 @@
 {
-  "name": "synccore",
+  "name": "synccore-monorepo",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "Zero-Cost MERN Team Collaboration Platform",
   "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "server": "npm start --prefix server",
+    "client": "npm run dev --prefix client",
+    "start": "npm start --prefix server",
+    "build:client": "npm run build --prefix client"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.9.4",
-    "socket.io": "^4.8.3"
-  }
+  "license": "ISC"
 }
