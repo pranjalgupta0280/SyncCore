@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTeam } from '../context/TeamContext';
+import { useAuth } from '../context/AuthContext';
 import API from '../services/api';
 import { getSocket } from '../services/socket';
 import {
@@ -9,8 +10,9 @@ import {
   CheckCircle2,
   AlertCircle,
   FolderPlus,
+  Users,
+  ShieldAlert,
   User,
-  Calendar,
 } from 'lucide-react';
 
 const STATUS_COLUMNS = ['To Do', 'In Progress', 'Completed'];
@@ -23,6 +25,7 @@ const PRIORITY_BADGES = {
 };
 
 export default function TaskBoard() {
+  const { user } = useAuth();
   const {
     activeTeam,
     projects,
@@ -43,11 +46,21 @@ export default function TaskBoard() {
   // New Subtask Form
   const [subtaskTitle, setSubtaskTitle] = useState('');
   const [subtaskPriority, setSubtaskPriority] = useState('Medium');
-  const [subtaskAssignee, setSubtaskAssignee] = useState('');
+  const [subtaskAssignee, setSubtaskAssignee] = useState(''); // Single Primary Assignee
+  const [subtaskCollaborators, setSubtaskCollaborators] = useState([]); // Multiple Members Working
   const [subtaskDeadline, setSubtaskDeadline] = useState('');
+  const [permissionError, setPermissionError] = useState('');
 
   const subtasks = activeProject?.subtasks || [];
   const teamMembers = activeTeam?.members || [];
+
+  // Check if current user is Team Admin
+  const isTeamAdmin =
+    activeTeam &&
+    (activeTeam.admin?._id === user?._id ||
+      teamMembers.some(
+        (m) => m.user?._id === user?._id && m.role === 'Admin'
+      ));
 
   const handleCreateProjectSubmit = async (e) => {
     e.preventDefault();
@@ -58,6 +71,14 @@ export default function TaskBoard() {
     setShowAddProjectModal(false);
   };
 
+  const handleToggleCollaborator = (userId) => {
+    if (subtaskCollaborators.includes(userId)) {
+      setSubtaskCollaborators(subtaskCollaborators.filter((id) => id !== userId));
+    } else {
+      setSubtaskCollaborators([...subtaskCollaborators, userId]);
+    }
+  };
+
   const handleAddSubtaskSubmit = async (e) => {
     e.preventDefault();
     if (!subtaskTitle.trim() || !activeProject) return;
@@ -66,7 +87,8 @@ export default function TaskBoard() {
       const res = await API.post(`/projects/${activeProject._id}/subtasks`, {
         title: subtaskTitle.trim(),
         priority: subtaskPriority,
-        assignedTo: subtaskAssignee || null,
+        assignedTo: subtaskAssignee || null, // Single Assignee
+        collaborators: subtaskCollaborators, // Multiple Members Working
         deadline: subtaskDeadline || null,
         status: 'To Do',
       });
@@ -75,7 +97,6 @@ export default function TaskBoard() {
         await fetchProjects(activeTeam._id);
         await fetchAnalytics(activeTeam._id);
 
-        // Broadcast task update via Socket.io
         const socket = getSocket();
         if (socket && activeTeam) {
           socket.emit('task_update', {
@@ -89,6 +110,7 @@ export default function TaskBoard() {
         setSubtaskTitle('');
         setSubtaskPriority('Medium');
         setSubtaskAssignee('');
+        setSubtaskCollaborators([]);
         setSubtaskDeadline('');
         setShowAddSubtaskModal(false);
       }
@@ -97,11 +119,34 @@ export default function TaskBoard() {
     }
   };
 
-  const handleStatusChange = async (subtaskId, newStatus) => {
+  const handleStatusChange = async (task, newStatus) => {
     if (!activeProject) return;
+    setPermissionError('');
+
+    const userIdStr = user?._id?.toString();
+
+    // Check permission: Must be Admin OR Primary Assignee OR Collaborator working on task
+    const isAssignee =
+      task.assignedTo &&
+      (task.assignedTo._id || task.assignedTo).toString() === userIdStr;
+
+    const isCollaborator =
+      Array.isArray(task.collaborators) &&
+      task.collaborators.some(
+        (c) => (c._id || c).toString() === userIdStr
+      );
+
+    if (!isTeamAdmin && !isAssignee && !isCollaborator) {
+      setPermissionError(
+        `Permission Denied: Task status can only be updated by the Team Admin, Primary Assignee, or members working on this task.`
+      );
+      setTimeout(() => setPermissionError(''), 4500);
+      return;
+    }
+
     try {
       const res = await API.patch(
-        `/projects/${activeProject._id}/subtasks/${subtaskId}`,
+        `/projects/${activeProject._id}/subtasks/${task._id}`,
         { status: newStatus }
       );
 
@@ -115,12 +160,15 @@ export default function TaskBoard() {
             teamId: activeTeam._id,
             projectId: activeProject._id,
             taskAction: 'status_change',
-            taskData: { subtaskId, newStatus },
+            taskData: { subtaskId: task._id, newStatus },
           });
         }
       }
     } catch (err) {
-      console.error('Failed to update subtask status', err);
+      setPermissionError(
+        err.response?.data?.message || 'Failed to update subtask status'
+      );
+      setTimeout(() => setPermissionError(''), 4500);
     }
   };
 
@@ -179,6 +227,16 @@ export default function TaskBoard() {
         )}
       </div>
 
+      {/* Permission Warning Banner */}
+      {permissionError && (
+        <div className="bg-rose-500/20 border-b border-rose-500/30 px-6 py-2 text-xs text-rose-300 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-rose-400" />
+            <span>{permissionError}</span>
+          </div>
+        </div>
+      )}
+
       {/* Board Columns */}
       {!activeProject ? (
         <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-xs gap-3">
@@ -214,61 +272,115 @@ export default function TaskBoard() {
 
                 {/* Cards Container */}
                 <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-                  {columnTasks.map((task) => (
-                    <div
-                      key={task._id}
-                      className="bg-slate-800/70 border border-white/10 hover:border-indigo-500/30 rounded-xl p-3.5 shadow-md space-y-3 transition-all group"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-xs font-semibold text-slate-100 group-hover:text-indigo-300 transition-colors">
-                          {task.title}
-                        </p>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
-                            PRIORITY_BADGES[task.priority] || PRIORITY_BADGES.Medium
-                          }`}
-                        >
-                          {task.priority}
-                        </span>
-                      </div>
+                  {columnTasks.map((task) => {
+                    const userIdStr = user?._id?.toString();
 
-                      {/* Card Footer */}
-                      <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                        {/* Assignee Avatar */}
-                        {task.assignedTo ? (
-                          <div className="flex items-center gap-1.5">
-                            <div
-                              className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white uppercase shrink-0"
-                              style={{
-                                backgroundColor:
-                                  task.assignedTo.avatarColor || '#6366f1',
-                              }}
-                            >
-                              {task.assignedTo.name?.[0]}
-                            </div>
-                            <span className="truncate max-w-[90px]">
-                              {task.assignedTo.name}
-                            </span>
+                    const isAssignee =
+                      task.assignedTo &&
+                      (task.assignedTo._id || task.assignedTo).toString() === userIdStr;
+
+                    const collaborators = Array.isArray(task.collaborators)
+                      ? task.collaborators.filter(Boolean)
+                      : [];
+
+                    const isCollaborator = collaborators.some(
+                      (c) => (c._id || c).toString() === userIdStr
+                    );
+
+                    const canEditStatus = isTeamAdmin || isAssignee || isCollaborator;
+
+                    return (
+                      <div
+                        key={task._id}
+                        className="bg-slate-800/70 border border-white/10 hover:border-indigo-500/30 rounded-xl p-3.5 shadow-md space-y-3 transition-all group"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-xs font-semibold text-slate-100 group-hover:text-indigo-300 transition-colors">
+                            {task.title}
+                          </p>
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
+                              PRIORITY_BADGES[task.priority] || PRIORITY_BADGES.Medium
+                            }`}
+                          >
+                            {task.priority}
+                          </span>
+                        </div>
+
+                        {/* Members Info */}
+                        <div className="space-y-1 text-[11px] text-slate-400 pt-1 border-t border-white/5">
+                          {/* Primary Assignee */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-slate-500">Assignee:</span>
+                            {task.assignedTo ? (
+                              <div className="flex items-center gap-1.5">
+                                <div
+                                  className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white uppercase shrink-0"
+                                  style={{
+                                    backgroundColor:
+                                      task.assignedTo.avatarColor || '#6366f1',
+                                  }}
+                                >
+                                  {task.assignedTo.name?.[0] || 'U'}
+                                </div>
+                                <span className="text-slate-200 font-medium">
+                                  {task.assignedTo.name}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-500 italic text-[10px]">Unassigned</span>
+                            )}
                           </div>
-                        ) : (
-                          <span className="text-slate-500 italic">Unassigned</span>
-                        )}
 
-                        {/* Status Change Selector */}
-                        <select
-                          value={task.status}
-                          onChange={(e) =>
-                            handleStatusChange(task._id, e.target.value)
-                          }
-                          className="bg-slate-900 text-slate-300 text-[10px] border border-white/10 rounded-lg px-2 py-1 focus:outline-none"
-                        >
-                          <option value="To Do">To Do</option>
-                          <option value="In Progress">In Progress</option>
-                          <option value="Completed">Completed</option>
-                        </select>
+                          {/* Collaborators Working on Task */}
+                          {collaborators.length > 0 && (
+                            <div className="flex items-center justify-between pt-0.5">
+                              <span className="text-[10px] text-slate-500">Working:</span>
+                              <div className="flex items-center -space-x-1 overflow-hidden">
+                                {collaborators.map((collab, idx) => (
+                                  <div
+                                    key={collab._id || idx}
+                                    title={collab.name || 'Collaborator'}
+                                    className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white uppercase shrink-0 border border-slate-900 shadow"
+                                    style={{
+                                      backgroundColor:
+                                        collab.avatarColor || '#10b981',
+                                    }}
+                                  >
+                                    {collab.name?.[0] || 'U'}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Card Footer: Status Change */}
+                        <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                          <span className="text-[10px] text-slate-500">Status:</span>
+                          <select
+                            value={task.status}
+                            disabled={!canEditStatus}
+                            title={
+                              canEditStatus
+                                ? 'Update Task Status'
+                                : 'Only Team Admin, Primary Assignee, or members working on task can change status'
+                            }
+                            onChange={(e) => handleStatusChange(task, e.target.value)}
+                            className={`bg-slate-900 text-[10px] border rounded-lg px-2 py-1 focus:outline-none transition-colors ${
+                              canEditStatus
+                                ? 'text-slate-200 border-white/10 hover:border-indigo-500/50 cursor-pointer'
+                                : 'text-slate-500 border-slate-800 opacity-60 cursor-not-allowed'
+                            }`}
+                          >
+                            <option value="To Do">To Do</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                          </select>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -346,6 +458,58 @@ export default function TaskBoard() {
                 />
               </div>
 
+              {/* Single Primary Assignee Dropdown */}
+              <div>
+                <label className="text-xs font-medium text-slate-400 block mb-1">
+                  Primary Assignee (Single user)
+                </label>
+                <select
+                  value={subtaskAssignee}
+                  onChange={(e) => setSubtaskAssignee(e.target.value)}
+                  className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                >
+                  <option value="">Unassigned</option>
+                  {teamMembers.map((m) => (
+                    <option key={m.user?._id} value={m.user?._id}>
+                      {m.user?.name} (@{m.user?.username})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Multiple Collaborators / Members Working Checklist */}
+              <div>
+                <label className="text-xs font-medium text-slate-400 block mb-1">
+                  Members Working on Task (Multiple Collaborators)
+                </label>
+                <div className="max-h-28 overflow-y-auto bg-slate-950 border border-white/10 rounded-xl p-2 space-y-1">
+                  {teamMembers.length === 0 ? (
+                    <p className="text-[11px] text-slate-500 p-1">No members in workspace.</p>
+                  ) : (
+                    teamMembers.map((m) => {
+                      const isChecked = subtaskCollaborators.includes(m.user?._id);
+                      return (
+                        <label
+                          key={m.user?._id}
+                          className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-slate-800/60 cursor-pointer text-xs"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => handleToggleCollaborator(m.user?._id)}
+                            className="rounded accent-indigo-600"
+                          />
+                          <span className="text-slate-200">{m.user?.name}</span>
+                          <span className="text-[10px] text-indigo-400">
+                            (@{m.user?.username})
+                          </span>
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-slate-400 block mb-1">
@@ -365,33 +529,15 @@ export default function TaskBoard() {
 
                 <div>
                   <label className="text-xs font-medium text-slate-400 block mb-1">
-                    Assignee
+                    Deadline
                   </label>
-                  <select
-                    value={subtaskAssignee}
-                    onChange={(e) => setSubtaskAssignee(e.target.value)}
+                  <input
+                    type="date"
+                    value={subtaskDeadline}
+                    onChange={(e) => setSubtaskDeadline(e.target.value)}
                     className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
-                  >
-                    <option value="">Unassigned</option>
-                    {teamMembers.map((m) => (
-                      <option key={m.user?._id} value={m.user?._id}>
-                        {m.user?.name} (@{m.user?.username})
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-slate-400 block mb-1">
-                  Deadline
-                </label>
-                <input
-                  type="date"
-                  value={subtaskDeadline}
-                  onChange={(e) => setSubtaskDeadline(e.target.value)}
-                  className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
-                />
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2">

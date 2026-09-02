@@ -80,29 +80,41 @@ const getTeamAnalytics = async (req, res, next) => {
       },
     ]);
 
-    // 2. Member workload distribution
+    // 2. Member workload distribution (primary assignees + collaborators)
     const memberWorkload = await Project.aggregate([
       { $match: { teamId } },
       { $unwind: '$subtasks' },
-      { $match: { 'subtasks.assignedTo': { $ne: null } } },
+      {
+        $project: {
+          status: '$subtasks.status',
+          deadline: '$subtasks.deadline',
+          allAssigned: {
+            $setUnion: [
+              { $cond: [{ $ne: ['$subtasks.assignedTo', null] }, ['$subtasks.assignedTo'], []] },
+              { $ifNull: ['$subtasks.collaborators', []] },
+            ],
+          },
+        },
+      },
+      { $unwind: '$allAssigned' },
       {
         $group: {
-          _id: '$subtasks.assignedTo',
+          _id: '$allAssigned',
           totalAssigned: { $sum: 1 },
           completed: {
-            $sum: { $cond: [{ $eq: ['$subtasks.status', 'Completed'] }, 1, 0] },
+            $sum: { $cond: [{ $eq: ['$status', 'Completed'] }, 1, 0] },
           },
           pending: {
-            $sum: { $cond: [{ $ne: ['$subtasks.status', 'Completed'] }, 1, 0] },
+            $sum: { $cond: [{ $ne: ['$status', 'Completed'] }, 1, 0] },
           },
           overdue: {
             $sum: {
               $cond: [
                 {
                   $and: [
-                    { $ne: ['$subtasks.status', 'Completed'] },
-                    { $ne: ['$subtasks.deadline', null] },
-                    { $lt: ['$subtasks.deadline', currentDate] },
+                    { $ne: ['$status', 'Completed'] },
+                    { $ne: ['$deadline', null] },
+                    { $lt: ['$deadline', currentDate] },
                   ],
                 },
                 1,
@@ -183,7 +195,14 @@ const getMyAnalytics = async (req, res, next) => {
     const myStats = await Project.aggregate([
       { $match: { teamId } },
       { $unwind: '$subtasks' },
-      { $match: { 'subtasks.assignedTo': userId } },
+      {
+        $match: {
+          $or: [
+            { 'subtasks.assignedTo': userId },
+            { 'subtasks.collaborators': userId },
+          ],
+        },
+      },
       {
         $group: {
           _id: null,

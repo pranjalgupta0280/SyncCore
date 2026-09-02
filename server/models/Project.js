@@ -10,8 +10,14 @@ const subtaskSchema = new mongoose.Schema(
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      default: null,
+      default: null, // Single primary assignee
     },
+    collaborators: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // Multiple members working on the same task
+      },
+    ],
     priority: {
       type: String,
       enum: ['Low', 'Medium', 'High', 'Urgent'],
