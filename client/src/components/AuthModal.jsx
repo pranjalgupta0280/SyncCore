@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Sparkles, Lock, Mail, User, Tag } from 'lucide-react';
+import { Sparkles, Lock, Mail, User, Tag, X } from 'lucide-react';
 
-export default function AuthModal() {
+export default function AuthModal({ onClose }) {
   const { login, register } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState('');
@@ -34,8 +34,16 @@ export default function AuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 bg-[#0B0F19] z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-slate-900 border border-white/10 rounded-3xl p-8 shadow-2xl space-y-6 relative overflow-hidden">
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="absolute top-5 right-5 text-slate-400 hover:text-white p-1"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
         {/* Glow backdrop */}
         <div className="absolute -top-20 -left-20 w-40 h-40 bg-indigo-600/30 rounded-full blur-3xl pointer-events-none" />
 

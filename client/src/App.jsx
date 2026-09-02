@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TeamProvider, useTeam } from './context/TeamContext';
+import LandingPage from './components/LandingPage';
 import Sidebar from './components/Sidebar';
 import ChatPanel from './components/ChatPanel';
 import TaskBoard from './components/TaskBoard';
@@ -13,21 +14,36 @@ function MainApp() {
   const { user, loading } = useAuth();
   const { activeTab } = useTeam();
 
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
 
   if (loading) {
     return (
-      <div className="h-screen w-screen bg-[#0B0F19] flex items-center justify-center text-xs text-indigo-400 font-semibold tracking-wider uppercase">
-        Initializing SyncCore Environment...
+      <div className="h-screen w-screen bg-[#0B0F19] flex items-center justify-center text-xs text-emerald-400 font-semibold tracking-wider uppercase">
+        Initializing SyncCore Platform...
       </div>
     );
   }
 
+  // Unauthenticated user -> Show Landing Page
   if (!user) {
-    return <AuthModal />;
+    return (
+      <>
+        <LandingPage
+          onGetStarted={() => setShowAuthModal(true)}
+          onLogin={() => setShowAuthModal(true)}
+        />
+        {showAuthModal && (
+          <div className="relative z-50">
+            <AuthModal onClose={() => setShowAuthModal(false)} />
+          </div>
+        )}
+      </>
+    );
   }
 
+  // Authenticated user -> Show Workspace Dashboard
   return (
     <div className="flex h-screen w-screen bg-[#0B0F19] text-white overflow-hidden">
       {/* Sidebar */}
