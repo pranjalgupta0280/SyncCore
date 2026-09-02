@@ -1,5 +1,16 @@
 const Project = require('../models/Project');
 
+const handleError = (error, res, next) => {
+  if (typeof next === 'function') {
+    return next(error);
+  }
+  return res.status(500).json({
+    success: false,
+    message: error.message || 'Internal Server Error',
+    error: error.message,
+  });
+};
+
 /**
  * @desc    Create a project container
  * @route   POST /api/teams/:teamId/projects
@@ -35,7 +46,7 @@ const createProject = async (req, res, next) => {
       data: populatedProject,
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -59,7 +70,7 @@ const getProjects = async (req, res, next) => {
       data: projects,
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -86,7 +97,7 @@ const getProjectById = async (req, res, next) => {
       data: project,
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -122,7 +133,7 @@ const updateProject = async (req, res, next) => {
       data: updatedProject,
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -148,7 +159,7 @@ const deleteProject = async (req, res, next) => {
       message: 'Project deleted successfully',
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -198,7 +209,7 @@ const addSubtask = async (req, res, next) => {
       data: updatedProject,
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -254,7 +265,7 @@ const updateSubtask = async (req, res, next) => {
       data: updatedProject,
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -288,7 +299,7 @@ const deleteSubtask = async (req, res, next) => {
       data: updatedProject,
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 

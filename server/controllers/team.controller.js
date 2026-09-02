@@ -2,6 +2,17 @@ const Team = require('../models/Team');
 const User = require('../models/User');
 const Project = require('../models/Project');
 
+const handleError = (error, res, next) => {
+  if (typeof next === 'function') {
+    return next(error);
+  }
+  return res.status(500).json({
+    success: false,
+    message: error.message || 'Internal Server Error',
+    error: error.message,
+  });
+};
+
 /**
  * @desc    Create a new Team workspace
  * @route   POST /api/teams
@@ -40,7 +51,7 @@ const createTeam = async (req, res, next) => {
       data: populatedTeam,
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -67,7 +78,7 @@ const getTeams = async (req, res, next) => {
       data: teams,
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -94,7 +105,7 @@ const getTeamById = async (req, res, next) => {
       data: team,
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -159,7 +170,7 @@ const addMember = async (req, res, next) => {
       data: updatedTeam,
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -224,7 +235,7 @@ const removeMember = async (req, res, next) => {
       data: updatedTeam,
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 

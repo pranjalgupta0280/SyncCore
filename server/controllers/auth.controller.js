@@ -9,6 +9,26 @@ const generateToken = (id) => {
 };
 
 /**
+ * Helper to handle errors safely regardless of whether `next` callback is passed
+ */
+const handleError = (error, res, next) => {
+  if (typeof next === 'function') {
+    return next(error);
+  }
+  let statusCode = 500;
+  if (error.code === 11000) {
+    statusCode = 400;
+    const field = Object.keys(error.keyValue)[0];
+    error.message = `Duplicate value entered for ${field} field. Please use another value.`;
+  }
+  return res.status(statusCode).json({
+    success: false,
+    message: error.message || 'Internal Server Error',
+    error: error.message,
+  });
+};
+
+/**
  * @desc    Register a new user
  * @route   POST /api/auth/register
  * @access  Public
@@ -68,7 +88,7 @@ const registerUser = async (req, res, next) => {
       });
     }
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -115,7 +135,7 @@ const loginUser = async (req, res, next) => {
       });
     }
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -132,7 +152,7 @@ const getMe = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 

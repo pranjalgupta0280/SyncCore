@@ -1,6 +1,17 @@
 const mongoose = require('mongoose');
 const Project = require('../models/Project');
 
+const handleError = (error, res, next) => {
+  if (typeof next === 'function') {
+    return next(error);
+  }
+  return res.status(500).json({
+    success: false,
+    message: error.message || 'Internal Server Error',
+    error: error.message,
+  });
+};
+
 /**
  * @desc    Get team analytics & metrics via MongoDB Aggregation Pipelines
  * @route   GET /api/teams/:teamId/stats
@@ -154,7 +165,7 @@ const getTeamAnalytics = async (req, res, next) => {
       },
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
@@ -239,7 +250,7 @@ const getMyAnalytics = async (req, res, next) => {
       },
     });
   } catch (error) {
-    next(error);
+    handleError(error, res, next);
   }
 };
 
