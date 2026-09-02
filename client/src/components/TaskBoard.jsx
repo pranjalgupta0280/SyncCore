@@ -65,10 +65,23 @@ export default function TaskBoard() {
   const handleCreateProjectSubmit = async (e) => {
     e.preventDefault();
     if (!projectTitle.trim()) return;
-    await createProject(projectTitle.trim(), projectDesc.trim(), null);
-    setProjectTitle('');
-    setProjectDesc('');
-    setShowAddProjectModal(false);
+
+    if (!isTeamAdmin) {
+      setPermissionError('Only Team Admins can create project containers.');
+      setTimeout(() => setPermissionError(''), 4500);
+      setShowAddProjectModal(false);
+      return;
+    }
+
+    try {
+      await createProject(projectTitle.trim(), projectDesc.trim(), null);
+      setProjectTitle('');
+      setProjectDesc('');
+      setShowAddProjectModal(false);
+    } catch (err) {
+      setPermissionError(err.response?.data?.message || 'Failed to create project');
+      setTimeout(() => setPermissionError(''), 4500);
+    }
   };
 
   const handleToggleCollaborator = (userId) => {
@@ -82,6 +95,13 @@ export default function TaskBoard() {
   const handleAddSubtaskSubmit = async (e) => {
     e.preventDefault();
     if (!subtaskTitle.trim() || !activeProject) return;
+
+    if (!isTeamAdmin) {
+      setPermissionError('Only Team Admins can create tasks and subtasks.');
+      setTimeout(() => setPermissionError(''), 4500);
+      setShowAddSubtaskModal(false);
+      return;
+    }
 
     try {
       const res = await API.post(`/projects/${activeProject._id}/subtasks`, {
@@ -115,7 +135,10 @@ export default function TaskBoard() {
         setShowAddSubtaskModal(false);
       }
     } catch (err) {
-      console.error('Failed to add subtask', err);
+      setPermissionError(
+        err.response?.data?.message || 'Failed to create subtask'
+      );
+      setTimeout(() => setPermissionError(''), 4500);
     }
   };
 
@@ -207,16 +230,20 @@ export default function TaskBoard() {
             ))}
           </div>
 
-          <button
-            onClick={() => setShowAddProjectModal(true)}
-            className="flex items-center gap-1 text-xs text-indigo-400 hover:bg-indigo-500/10 px-2.5 py-1.5 rounded-lg font-medium transition-colors"
-          >
-            <FolderPlus className="w-3.5 h-3.5" />
-            <span>New Project</span>
-          </button>
+          {/* New Project Button (Admin Only) */}
+          {isTeamAdmin && (
+            <button
+              onClick={() => setShowAddProjectModal(true)}
+              className="flex items-center gap-1 text-xs text-indigo-400 hover:bg-indigo-500/10 px-2.5 py-1.5 rounded-lg font-medium transition-colors"
+            >
+              <FolderPlus className="w-3.5 h-3.5" />
+              <span>New Project</span>
+            </button>
+          )}
         </div>
 
-        {activeProject && (
+        {/* Add Subtask Button (Admin Only) */}
+        {activeProject && isTeamAdmin && (
           <button
             onClick={() => setShowAddSubtaskModal(true)}
             className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition-all shadow-md shadow-indigo-600/30"
@@ -241,13 +268,15 @@ export default function TaskBoard() {
       {!activeProject ? (
         <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-xs gap-3">
           <FolderPlus className="w-10 h-10 text-slate-600" />
-          <p>No project workspace selected. Create a project to start tracking tasks!</p>
-          <button
-            onClick={() => setShowAddProjectModal(true)}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-indigo-500 transition-colors"
-          >
-            Create First Project
-          </button>
+          <p>No project workspace selected. {isTeamAdmin ? 'Create a project to start tracking tasks!' : 'Waiting for Team Admin to create projects.'}</p>
+          {isTeamAdmin && (
+            <button
+              onClick={() => setShowAddProjectModal(true)}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-indigo-500 transition-colors"
+            >
+              Create First Project
+            </button>
+          )}
         </div>
       ) : (
         <div className="flex-1 p-6 grid grid-cols-3 gap-6 overflow-x-auto">
