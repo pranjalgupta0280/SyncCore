@@ -59,8 +59,8 @@ export default function MemberModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-lg space-y-5 shadow-2xl relative">
+    <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-[#0D0D0D] border border-white/10 rounded-2xl p-6 w-full max-w-lg space-y-5 shadow-2xl relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-white p-1"
@@ -69,13 +69,13 @@ export default function MemberModal({ isOpen, onClose }) {
         </button>
 
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
             <UserPlus className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-base font-bold text-white">Team Member Management</h3>
             <p className="text-xs text-slate-400">
-              Workspace: <strong className="text-indigo-400">{activeTeam.name}</strong>
+              Workspace: <strong className="text-emerald-400">{activeTeam.name}</strong>
             </p>
           </div>
         </div>

@@ -197,19 +197,19 @@ export default function TaskBoard() {
 
   if (!activeTeam) {
     return (
-      <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">
+      <div className="flex-1 flex items-center justify-center text-slate-500 text-sm bg-[#050505]">
         Select a team workspace to view Kanban tasks.
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#0B0F19] overflow-hidden">
+    <div className="flex-1 flex flex-col h-full bg-[#050505] overflow-hidden">
       {/* Kanban Header & Project Selector */}
-      <div className="h-16 border-b border-white/10 px-6 flex items-center justify-between bg-slate-950/40 backdrop-blur-md shrink-0">
+      <div className="h-16 border-b border-white/10 px-6 flex items-center justify-between bg-[#0A0A0A]/80 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <Kanban className="w-5 h-5 text-indigo-400" />
+            <Kanban className="w-5 h-5 text-emerald-400" />
             <h2 className="text-sm font-semibold text-white">Project Workspaces</h2>
           </div>
 
@@ -221,8 +221,8 @@ export default function TaskBoard() {
                 onClick={() => setActiveProject(proj)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 ${
                   activeProject?._id === proj._id
-                    ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/30'
-                    : 'bg-slate-800/40 text-slate-400 hover:text-slate-200'
+                    ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/30'
+                    : 'bg-[#141414] text-slate-400 hover:text-slate-200'
                 }`}
               >
                 {proj.title}
@@ -234,7 +234,7 @@ export default function TaskBoard() {
           {isTeamAdmin && (
             <button
               onClick={() => setShowAddProjectModal(true)}
-              className="flex items-center gap-1 text-xs text-indigo-400 hover:bg-indigo-500/10 px-2.5 py-1.5 rounded-lg font-medium transition-colors"
+              className="flex items-center gap-1 text-xs text-emerald-400 hover:bg-emerald-500/10 px-2.5 py-1.5 rounded-lg font-medium transition-colors"
             >
               <FolderPlus className="w-3.5 h-3.5" />
               <span>New Project</span>
@@ -246,7 +246,7 @@ export default function TaskBoard() {
         {activeProject && isTeamAdmin && (
           <button
             onClick={() => setShowAddSubtaskModal(true)}
-            className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition-all shadow-md shadow-indigo-600/30"
+            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition-all shadow-md shadow-emerald-600/20"
           >
             <Plus className="w-4 h-4" />
             <span>Add Subtask</span>
@@ -266,13 +266,13 @@ export default function TaskBoard() {
 
       {/* Board Columns */}
       {!activeProject ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-xs gap-3">
+        <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-xs gap-3 bg-[#050505]">
           <FolderPlus className="w-10 h-10 text-slate-600" />
           <p>No project workspace selected. {isTeamAdmin ? 'Create a project to start tracking tasks!' : 'Waiting for Team Admin to create projects.'}</p>
           {isTeamAdmin && (
             <button
               onClick={() => setShowAddProjectModal(true)}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-indigo-500 transition-colors"
+              className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-emerald-500 transition-colors"
             >
               Create First Project
             </button>
@@ -285,7 +285,7 @@ export default function TaskBoard() {
             return (
               <div
                 key={status}
-                className="bg-slate-900/60 border border-white/5 rounded-2xl p-4 flex flex-col h-full"
+                className="bg-[#0C0C0E] border border-white/10 rounded-2xl p-4 flex flex-col h-full"
               >
                 {/* Column Header */}
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/5">
@@ -293,7 +293,7 @@ export default function TaskBoard() {
                     <span className="text-xs font-bold text-white uppercase tracking-wider">
                       {status}
                     </span>
-                    <span className="text-[10px] font-semibold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
                       {columnTasks.length}
                     </span>
                   </div>
@@ -321,10 +321,10 @@ export default function TaskBoard() {
                     return (
                       <div
                         key={task._id}
-                        className="bg-slate-800/70 border border-white/10 hover:border-indigo-500/30 rounded-xl p-3.5 shadow-md space-y-3 transition-all group"
+                        className="bg-[#141416] border border-white/10 hover:border-emerald-500/30 rounded-xl p-3.5 shadow-md space-y-3 transition-all group"
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <p className="text-xs font-semibold text-slate-100 group-hover:text-indigo-300 transition-colors">
+                          <p className="text-xs font-semibold text-slate-100 group-hover:text-emerald-300 transition-colors">
                             {task.title}
                           </p>
                           <span
@@ -347,7 +347,7 @@ export default function TaskBoard() {
                                   className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white uppercase shrink-0"
                                   style={{
                                     backgroundColor:
-                                      task.assignedTo.avatarColor || '#6366f1',
+                                      task.assignedTo.avatarColor || '#10b981',
                                   }}
                                 >
                                   {task.assignedTo.name?.[0] || 'U'}
@@ -396,10 +396,10 @@ export default function TaskBoard() {
                                 : 'Only Team Admin, Primary Assignee, or members working on task can change status'
                             }
                             onChange={(e) => handleStatusChange(task, e.target.value)}
-                            className={`bg-slate-900 text-[10px] border rounded-lg px-2 py-1 focus:outline-none transition-colors ${
+                            className={`bg-[#0A0A0A] text-[10px] border rounded-lg px-2 py-1 focus:outline-none transition-colors ${
                               canEditStatus
-                                ? 'text-slate-200 border-white/10 hover:border-indigo-500/50 cursor-pointer'
-                                : 'text-slate-500 border-slate-800 opacity-60 cursor-not-allowed'
+                                ? 'text-slate-200 border-white/10 hover:border-emerald-500/50 cursor-pointer'
+                                : 'text-slate-500 border-zinc-800 opacity-60 cursor-not-allowed'
                             }`}
                           >
                             <option value="To Do">To Do</option>
@@ -419,8 +419,8 @@ export default function TaskBoard() {
 
       {/* Add Project Modal */}
       {showAddProjectModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0D0D0D] border border-white/10 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
             <h3 className="text-base font-bold text-white">Create New Project Container</h3>
             <form onSubmit={handleCreateProjectSubmit} className="space-y-3">
               <div>
@@ -433,7 +433,7 @@ export default function TaskBoard() {
                   value={projectTitle}
                   onChange={(e) => setProjectTitle(e.target.value)}
                   placeholder="e.g. Q3 Engineering Roadmap"
-                  className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#161616] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
                 />
               </div>
               <div>
@@ -444,7 +444,7 @@ export default function TaskBoard() {
                   value={projectDesc}
                   onChange={(e) => setProjectDesc(e.target.value)}
                   placeholder="Brief summary of milestones..."
-                  className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 h-20"
+                  className="w-full bg-[#161616] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 h-20"
                 />
               </div>
               <div className="flex items-center justify-end gap-2 pt-2">
@@ -457,7 +457,7 @@ export default function TaskBoard() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl"
                 >
                   Create Project
                 </button>
@@ -469,8 +469,8 @@ export default function TaskBoard() {
 
       {/* Add Subtask Modal */}
       {showAddSubtaskModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0D0D0D] border border-white/10 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
             <h3 className="text-base font-bold text-white">Add New Subtask</h3>
             <form onSubmit={handleAddSubtaskSubmit} className="space-y-3">
               <div>
@@ -483,7 +483,7 @@ export default function TaskBoard() {
                   value={subtaskTitle}
                   onChange={(e) => setSubtaskTitle(e.target.value)}
                   placeholder="e.g. Implement Socket Auth middleware"
-                  className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#161616] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
@@ -495,7 +495,7 @@ export default function TaskBoard() {
                 <select
                   value={subtaskAssignee}
                   onChange={(e) => setSubtaskAssignee(e.target.value)}
-                  className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#161616] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="">Unassigned</option>
                   {teamMembers.map((m) => (
@@ -511,7 +511,7 @@ export default function TaskBoard() {
                 <label className="text-xs font-medium text-slate-400 block mb-1">
                   Members Working on Task (Multiple Collaborators)
                 </label>
-                <div className="max-h-28 overflow-y-auto bg-slate-950 border border-white/10 rounded-xl p-2 space-y-1">
+                <div className="max-h-28 overflow-y-auto bg-[#050505] border border-white/10 rounded-xl p-2 space-y-1">
                   {teamMembers.length === 0 ? (
                     <p className="text-[11px] text-slate-500 p-1">No members in workspace.</p>
                   ) : (
@@ -520,16 +520,16 @@ export default function TaskBoard() {
                       return (
                         <label
                           key={m.user?._id}
-                          className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-slate-800/60 cursor-pointer text-xs"
+                          className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-[#1A1A1A] cursor-pointer text-xs"
                         >
                           <input
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => handleToggleCollaborator(m.user?._id)}
-                            className="rounded accent-indigo-600"
+                            className="rounded accent-emerald-600"
                           />
                           <span className="text-slate-200">{m.user?.name}</span>
-                          <span className="text-[10px] text-indigo-400">
+                          <span className="text-[10px] text-emerald-400">
                             (@{m.user?.username})
                           </span>
                         </label>
@@ -547,7 +547,7 @@ export default function TaskBoard() {
                   <select
                     value={subtaskPriority}
                     onChange={(e) => setSubtaskPriority(e.target.value)}
-                    className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#161616] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
                   >
                     <option value="Low">Low</option>
                     <option value="Medium">Medium</option>
@@ -564,7 +564,7 @@ export default function TaskBoard() {
                     type="date"
                     value={subtaskDeadline}
                     onChange={(e) => setSubtaskDeadline(e.target.value)}
-                    className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#161616] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
@@ -579,7 +579,7 @@ export default function TaskBoard() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl"
                 >
                   Add Subtask
                 </button>

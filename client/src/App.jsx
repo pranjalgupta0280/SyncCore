@@ -20,7 +20,7 @@ function MainApp() {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen bg-[#0B0F19] flex items-center justify-center text-xs text-emerald-400 font-semibold tracking-wider uppercase">
+      <div className="h-screen w-screen bg-[#050505] flex items-center justify-center text-xs text-emerald-400 font-semibold tracking-wider uppercase">
         Initializing SyncCore Platform...
       </div>
     );
@@ -45,7 +45,7 @@ function MainApp() {
 
   // Authenticated user -> Show Workspace Dashboard
   return (
-    <div className="flex h-screen w-screen bg-[#0B0F19] text-white overflow-hidden">
+    <div className="flex h-screen w-screen bg-[#050505] text-white overflow-hidden">
       {/* Sidebar */}
       <Sidebar
         onOpenMemberModal={() => setIsMemberModalOpen(true)}

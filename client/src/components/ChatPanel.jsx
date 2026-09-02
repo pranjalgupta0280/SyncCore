@@ -107,22 +107,22 @@ export default function ChatPanel() {
 
   if (!activeTeam) {
     return (
-      <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">
+      <div className="flex-1 flex items-center justify-center text-slate-500 text-sm bg-[#050505]">
         Select or create a team workspace to start messaging.
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#0B0F19]">
+    <div className="flex-1 flex flex-col h-full bg-[#050505]">
       {/* Chat Header */}
-      <div className="h-16 border-b border-white/10 px-6 flex items-center justify-between bg-slate-950/40 backdrop-blur-md shrink-0">
+      <div className="h-16 border-b border-white/10 px-6 flex items-center justify-between bg-[#0A0A0A]/80 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-3">
           {activeDmUser ? (
             <div className="flex items-center gap-3">
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white uppercase shadow"
-                style={{ backgroundColor: activeDmUser.avatarColor || '#6366f1' }}
+                style={{ backgroundColor: activeDmUser.avatarColor || '#10b981' }}
               >
                 {activeDmUser.name?.[0]}
               </div>
@@ -130,12 +130,12 @@ export default function ChatPanel() {
                 <h2 className="text-sm font-semibold text-white">
                   {activeDmUser.name}
                 </h2>
-                <p className="text-[11px] text-indigo-400">@{activeDmUser.username}</p>
+                <p className="text-[11px] text-emerald-400">@{activeDmUser.username}</p>
               </div>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Hash className="w-5 h-5 text-indigo-400" />
+              <Hash className="w-5 h-5 text-emerald-400" />
               <h2 className="text-sm font-semibold text-white">general</h2>
               <span className="text-xs text-slate-500 font-normal">
                 | Public Team Channel
@@ -144,7 +144,7 @@ export default function ChatPanel() {
           )}
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-800/40 px-3 py-1.5 rounded-full border border-white/5">
+        <div className="flex items-center gap-2 text-xs text-slate-400 bg-[#141414] px-3 py-1.5 rounded-full border border-white/5">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           <span>SyncCore Encrypted Socket Stream</span>
         </div>
@@ -171,7 +171,7 @@ export default function ChatPanel() {
               >
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white uppercase shrink-0 shadow mt-0.5"
-                  style={{ backgroundColor: msg.sender?.avatarColor || '#6366f1' }}
+                  style={{ backgroundColor: msg.sender?.avatarColor || '#10b981' }}
                 >
                   {msg.sender?.name?.[0] || 'U'}
                 </div>
@@ -192,8 +192,8 @@ export default function ChatPanel() {
                   <div
                     className={`px-4 py-2.5 rounded-2xl text-xs leading-relaxed max-w-md shadow-md ${
                       isSelf
-                        ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-tr-none'
-                        : 'bg-slate-800/80 text-slate-200 border border-white/5 rounded-tl-none'
+                        ? 'bg-gradient-to-r from-emerald-700 to-emerald-600 text-white rounded-tr-none'
+                        : 'bg-[#121212] text-slate-200 border border-white/10 rounded-tl-none'
                     }`}
                   >
                     {msg.content}
@@ -209,9 +209,9 @@ export default function ChatPanel() {
       {/* Input Box */}
       <form
         onSubmit={handleSendMessage}
-        className="p-4 border-t border-white/10 bg-slate-950/60 backdrop-blur-md"
+        className="p-4 border-t border-white/10 bg-[#0A0A0A]/90 backdrop-blur-md"
       >
-        <div className="flex items-center gap-2 bg-slate-900 border border-white/10 rounded-xl px-4 py-2.5 focus-within:border-indigo-500/50 transition-colors">
+        <div className="flex items-center gap-2 bg-[#121212] border border-white/10 rounded-xl px-4 py-2.5 focus-within:border-emerald-500/50 transition-colors">
           <input
             type="text"
             value={inputText}
@@ -226,7 +226,7 @@ export default function ChatPanel() {
           <button
             type="submit"
             disabled={!inputText.trim()}
-            className="p-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:hover:bg-indigo-600 text-white transition-all shadow-md shadow-indigo-600/30"
+            className="p-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white transition-all shadow-md"
           >
             <Send className="w-4 h-4" />
           </button>

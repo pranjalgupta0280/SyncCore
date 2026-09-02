@@ -14,7 +14,7 @@ export default function AnalyticsPanel() {
 
   if (!activeTeam) {
     return (
-      <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">
+      <div className="flex-1 flex items-center justify-center text-slate-500 text-sm bg-[#050505]">
         Select a team workspace to view performance metrics.
       </div>
     );
@@ -32,12 +32,12 @@ export default function AnalyticsPanel() {
   const memberWorkload = analytics?.memberWorkload || [];
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#0B0F19] overflow-y-auto p-6 space-y-6">
+    <div className="flex-1 flex flex-col h-full bg-[#050505] overflow-y-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-indigo-400" />
+            <BarChart3 className="w-5 h-5 text-emerald-400" />
             <span>Team Performance & Workload Analytics</span>
           </h2>
           <p className="text-xs text-slate-400">
@@ -49,7 +49,7 @@ export default function AnalyticsPanel() {
       {/* Top Cards Grid */}
       <div className="grid grid-cols-4 gap-4">
         {/* Card 1: Completion Rate */}
-        <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+        <div className="bg-[#0D0D0D] border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-lg">
           <div className="space-y-1">
             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Completion Rate
@@ -61,13 +61,13 @@ export default function AnalyticsPanel() {
               {summary.completedSubtasks} of {summary.totalSubtasks} tasks done
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
             <TrendingUp className="w-6 h-6" />
           </div>
         </div>
 
         {/* Card 2: Total Completed */}
-        <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+        <div className="bg-[#0D0D0D] border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-lg">
           <div className="space-y-1">
             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Completed Tasks
@@ -83,7 +83,7 @@ export default function AnalyticsPanel() {
         </div>
 
         {/* Card 3: In Progress */}
-        <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+        <div className="bg-[#0D0D0D] border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-lg">
           <div className="space-y-1">
             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               In Progress
@@ -99,7 +99,7 @@ export default function AnalyticsPanel() {
         </div>
 
         {/* Card 4: Overdue Subtasks */}
-        <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+        <div className="bg-[#0D0D0D] border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-lg">
           <div className="space-y-1">
             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Overdue Tasks
@@ -116,10 +116,10 @@ export default function AnalyticsPanel() {
       </div>
 
       {/* Member Workload Distribution Table */}
-      <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-6 shadow-xl space-y-4">
+      <div className="bg-[#0D0D0D] border border-white/10 rounded-2xl p-6 shadow-xl space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <Users className="w-4 h-4 text-indigo-400" />
+            <Users className="w-4 h-4 text-emerald-400" />
             <span>Member Workload & Efficiency Distribution</span>
           </h3>
           <span className="text-xs text-slate-400">
@@ -136,19 +136,19 @@ export default function AnalyticsPanel() {
             {memberWorkload.map((mw) => (
               <div
                 key={mw.userId}
-                className="bg-slate-800/50 border border-white/5 rounded-xl p-4 space-y-2"
+                className="bg-[#141416] border border-white/5 rounded-xl p-4 space-y-2"
               >
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2.5">
                     <div
                       className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white uppercase"
-                      style={{ backgroundColor: mw.avatarColor || '#6366f1' }}
+                      style={{ backgroundColor: mw.avatarColor || '#10b981' }}
                     >
                       {mw.name?.[0]}
                     </div>
                     <div>
                       <p className="font-semibold text-white">{mw.name}</p>
-                      <p className="text-[10px] text-indigo-400">@{mw.username}</p>
+                      <p className="text-[10px] text-emerald-400">@{mw.username}</p>
                     </div>
                   </div>
 
@@ -162,16 +162,16 @@ export default function AnalyticsPanel() {
                     <span className="text-rose-400">
                       Overdue: <strong>{mw.overdue}</strong>
                     </span>
-                    <span className="font-bold text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-md">
+                    <span className="font-bold text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md">
                       {Math.round(mw.completionPercentage || 0)}%
                     </span>
                   </div>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-[#050505] rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-indigo-600 to-emerald-400 transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-emerald-600 to-indigo-500 transition-all duration-500"
                     style={{ width: `${Math.min(100, Math.max(0, mw.completionPercentage))}%` }}
                   />
                 </div>
