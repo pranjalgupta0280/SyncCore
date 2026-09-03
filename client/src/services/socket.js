@@ -4,9 +4,12 @@ let socket = null;
 
 export const connectSocket = (token) => {
   if (!socket) {
-    socket = io('/', {
+    const targetUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || undefined;
+
+    socket = io(targetUrl || window.location.origin, {
       auth: { token },
       autoConnect: true,
+      transports: ['websocket', 'polling'],
     });
 
     socket.on('connect', () => {

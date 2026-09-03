@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: synccore-backend
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CLIENT_URL
+        value: https://synccore-kappa.vercel.app
+      - key: JWT_SECRET
+        value: synccore_super_secret_jwt_key_2026
