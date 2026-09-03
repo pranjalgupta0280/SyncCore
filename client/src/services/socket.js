@@ -1,19 +1,23 @@
 import { io } from 'socket.io-client';
 
 let socket = null;
+const FALLBACK_SOCKET_URL = 'https://synccore-cgqc.onrender.com';
 
 export const connectSocket = (token) => {
   if (!socket) {
-    const targetUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || undefined;
+    const targetUrl =
+      import.meta.env.VITE_SOCKET_URL ||
+      import.meta.env.VITE_API_URL ||
+      (import.meta.env.PROD ? FALLBACK_SOCKET_URL : window.location.origin);
 
-    socket = io(targetUrl || window.location.origin, {
+    socket = io(targetUrl, {
       auth: { token },
       autoConnect: true,
       transports: ['websocket', 'polling'],
     });
 
     socket.on('connect', () => {
-      console.log('[Socket.io] Connected to server. Socket ID:', socket.id);
+      console.log('[Socket.io] Connected to server at', targetUrl, 'Socket ID:', socket.id);
     });
 
     socket.on('disconnect', () => {

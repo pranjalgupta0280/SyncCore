@@ -1,10 +1,11 @@
 {
   "name": "synccore",
   "version": "1.0.0",
-  "description": "",
+  "description": "SyncCore Backend API Platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "build": "echo 'No build step required for Express server'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

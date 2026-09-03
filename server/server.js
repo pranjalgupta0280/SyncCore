@@ -26,6 +26,7 @@ const server = http.createServer(app);
 // Allowed Origins for Production & Development
 const allowedOrigins = [
   'https://synccore-kappa.vercel.app',
+  'https://synccore-cgqc.onrender.com',
   process.env.CLIENT_URL,
   'http://localhost:3000',
   'http://localhost:5173',
@@ -39,7 +40,6 @@ const corsOptions = {
     if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
       callback(null, true);
     } else {
-      // Allow any origin if CLIENT_URL is not strictly enforced
       callback(null, true);
     }
   },
@@ -76,6 +76,7 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'online',
     system: 'SyncCore Team Collaboration API Platform',
+    backendUrl: 'https://synccore-cgqc.onrender.com',
     clientUrl: 'https://synccore-kappa.vercel.app',
     timestamp: new Date(),
   });
@@ -84,6 +85,7 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   res.status(200).json({
     message: 'SyncCore Backend API Service is Live',
+    backend: 'https://synccore-cgqc.onrender.com',
     frontend: 'https://synccore-kappa.vercel.app',
     health: '/health',
   });
@@ -113,6 +115,7 @@ server.listen(PORT, () => {
     `==================================================\n` +
     `  SyncCore Server running in ${process.env.NODE_ENV || 'development'} mode\n` +
     `  Listening on HTTP & WebSocket Port: ${PORT}\n` +
+    `  Live Backend: https://synccore-cgqc.onrender.com\n` +
     `  Live Frontend Allowed: https://synccore-kappa.vercel.app\n` +
     `==================================================`
   );
