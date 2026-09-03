@@ -23,8 +23,9 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-// Initialize Socket.io
+// Initialize Socket.io with 50MB maxHttpBufferSize for image attachments
 const io = new Server(server, {
+  maxHttpBufferSize: 5e7, // 50MB
   cors: {
     origin: '*', // Configurable for production frontend origin
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
@@ -33,9 +34,10 @@ const io = new Server(server, {
 
 initSocketIO(io);
 
-// Global Middleware Pipeline
+// Global Middleware Pipeline with 50mb payload body parser limit
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Request logger middleware for debugging
 app.use((req, res, next) => {

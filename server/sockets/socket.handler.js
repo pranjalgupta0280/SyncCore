@@ -55,11 +55,14 @@ const initSocketIO = (io) => {
       }
     });
 
-    // Event 3: Send Channel Broadcast Message (Public team message)
-    socket.on('send_channel_message', async ({ teamId, content }, callback) => {
+    // Event 3: Send Channel Broadcast Message (Public team message with optional image)
+    socket.on('send_channel_message', async ({ teamId, content, image }, callback) => {
       try {
-        if (!teamId || !content) {
-          if (callback) callback({ success: false, error: 'teamId and content are required' });
+        const text = typeof content === 'string' ? content.trim() : '';
+        const img = typeof image === 'string' ? image.trim() : null;
+
+        if (!teamId || (!text && !img)) {
+          if (callback) callback({ success: false, error: 'teamId and either content or image are required' });
           return;
         }
 
@@ -67,7 +70,8 @@ const initSocketIO = (io) => {
           teamId,
           sender: socket.user._id,
           recipient: null,
-          content,
+          content: text,
+          image: img,
         });
 
         const populatedMsg = await Message.findById(message._id)
@@ -83,11 +87,14 @@ const initSocketIO = (io) => {
       }
     });
 
-    // Event 4: Send 1-on-1 Direct Message (Private message)
-    socket.on('send_direct_message', async ({ teamId, recipientId, content }, callback) => {
+    // Event 4: Send 1-on-1 Direct Message (Private message with optional image)
+    socket.on('send_direct_message', async ({ teamId, recipientId, content, image }, callback) => {
       try {
-        if (!teamId || !recipientId || !content) {
-          if (callback) callback({ success: false, error: 'teamId, recipientId, and content are required' });
+        const text = typeof content === 'string' ? content.trim() : '';
+        const img = typeof image === 'string' ? image.trim() : null;
+
+        if (!teamId || !recipientId || (!text && !img)) {
+          if (callback) callback({ success: false, error: 'teamId, recipientId, and either message content or image are required' });
           return;
         }
 
@@ -95,7 +102,8 @@ const initSocketIO = (io) => {
           teamId,
           sender: socket.user._id,
           recipient: recipientId,
-          content,
+          content: text,
+          image: img,
         });
 
         const populatedMsg = await Message.findById(message._id)

@@ -20,8 +20,12 @@ const messageSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: [true, 'Message content cannot be empty'],
+      default: '',
       trim: true,
+    },
+    image: {
+      type: String, // Base64 data URL or image URL
+      default: null,
     },
     createdAt: {
       type: Date,
