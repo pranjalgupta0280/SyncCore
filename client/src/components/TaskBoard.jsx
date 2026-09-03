@@ -114,7 +114,7 @@ export default function TaskBoard() {
       });
 
       if (res.data.success) {
-        await fetchProjects(activeTeam._id);
+        await fetchProjects(activeTeam._id, activeProject._id);
         await fetchAnalytics(activeTeam._id);
 
         const socket = getSocket();
@@ -174,7 +174,7 @@ export default function TaskBoard() {
       );
 
       if (res.data.success) {
-        await fetchProjects(activeTeam._id);
+        await fetchProjects(activeTeam._id, activeProject._id);
         await fetchAnalytics(activeTeam._id);
 
         const socket = getSocket();

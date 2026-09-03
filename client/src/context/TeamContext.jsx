@@ -34,14 +34,20 @@ export const TeamProvider = ({ children }) => {
     }
   };
 
-  const fetchProjects = async (teamId) => {
+  const fetchProjects = async (teamId, targetProjectId = null) => {
     if (!teamId) return;
     try {
       const res = await API.get(`/teams/${teamId}/projects`);
       if (res.data.success) {
-        setProjects(res.data.data);
-        if (res.data.data.length > 0) {
-          setActiveProject(res.data.data[0]);
+        const fetchedProjects = res.data.data;
+        setProjects(fetchedProjects);
+
+        if (fetchedProjects.length > 0) {
+          setActiveProject((prevActive) => {
+            const desiredId = targetProjectId || prevActive?._id;
+            const match = fetchedProjects.find((p) => p._id === desiredId);
+            return match || fetchedProjects[0];
+          });
         } else {
           setActiveProject(null);
         }
@@ -103,7 +109,7 @@ export const TeamProvider = ({ children }) => {
       deadline,
     });
     if (res.data.success) {
-      await fetchProjects(activeTeam._id);
+      await fetchProjects(activeTeam._id, res.data.data._id);
       setActiveProject(res.data.data);
       return res.data.data;
     }
