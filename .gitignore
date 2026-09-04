@@ -24,3 +24,6 @@ Thumbs.db
 # IDE settings
 .vscode/
 .idea/
+
+# Explanation Notes
+# TASK_CONTROLLER_HOOKS_EXPLANATION.md
