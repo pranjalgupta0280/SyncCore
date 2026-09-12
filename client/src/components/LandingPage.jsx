@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import {
   Sparkles,
   ArrowRight,
@@ -22,36 +23,47 @@ import {
   Users,
   Key,
   Activity,
-  Terminal
+  Terminal,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 export default function LandingPage({ onGetStarted, onLogin }) {
+  const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('features'); // 'features' | 'admin-user' | 'architecture' | 'uniqueness'
   const [activeRole, setActiveRole] = useState('admin'); // 'admin' | 'user'
   const [activeFlowchart, setActiveFlowchart] = useState('auth'); // 'auth' | 'rbac' | 'mongo'
 
+  const isLight = theme === 'light';
+
   return (
-    <div className="min-h-screen bg-[#050505] text-slate-100 font-sans selection:bg-emerald-500/30 selection:text-emerald-300">
+    <div className={`min-h-screen font-sans selection:bg-emerald-500/30 selection:text-emerald-500 transition-colors ${
+      isLight ? 'bg-[#FAFAFC] text-slate-900' : 'bg-[#050505] text-slate-100'
+    }`}>
       {/* Top Navigation */}
-      <nav className="sticky top-0 z-50 bg-[#0A0D14]/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-8 lg:px-12 py-3.5 flex items-center justify-between">
+      <nav className={`sticky top-0 z-50 backdrop-blur-md border-b px-4 sm:px-8 lg:px-12 py-3.5 flex items-center justify-between transition-colors ${
+        isLight ? 'bg-white/90 border-slate-200' : 'bg-[#0A0D14]/90 border-white/10'
+      }`}>
         {/* Logo */}
         <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveTab('features')}>
           <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-slate-950 font-bold shadow-lg shadow-emerald-500/20">
             <Sparkles className="w-4.5 h-4.5 stroke-[2.5]" />
           </div>
           <div className="flex flex-col">
-            <span className="font-extrabold text-base tracking-tight text-white flex items-center gap-1.5">
-              SyncCore <span className="text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 rounded">v2.0</span>
+            <span className={`font-extrabold text-base tracking-tight flex items-center gap-1.5 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+              SyncCore <span className="text-[10px] font-semibold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 rounded">v2.0</span>
             </span>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="hidden md:flex items-center gap-1.5 p-1 rounded-xl bg-white/5 border border-white/10 text-xs font-medium text-slate-300">
+        <div className={`hidden md:flex items-center gap-1.5 p-1 rounded-xl border text-xs font-medium ${
+          isLight ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-white/5 border-white/10 text-slate-300'
+        }`}>
           <button
             onClick={() => setActiveTab('features')}
             className={`px-3 py-1.5 rounded-lg transition-all ${
-              activeTab === 'features' ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm' : 'hover:text-white hover:bg-white/5'
+              activeTab === 'features' ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm' : isLight ? 'hover:text-slate-900 hover:bg-slate-200/60' : 'hover:text-white hover:bg-white/5'
             }`}
           >
             Features & Showcase
@@ -59,7 +71,7 @@ export default function LandingPage({ onGetStarted, onLogin }) {
           <button
             onClick={() => setActiveTab('admin-user')}
             className={`px-3 py-1.5 rounded-lg transition-all ${
-              activeTab === 'admin-user' ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm' : 'hover:text-white hover:bg-white/5'
+              activeTab === 'admin-user' ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm' : isLight ? 'hover:text-slate-900 hover:bg-slate-200/60' : 'hover:text-white hover:bg-white/5'
             }`}
           >
             Admin vs User Guide
@@ -67,7 +79,7 @@ export default function LandingPage({ onGetStarted, onLogin }) {
           <button
             onClick={() => setActiveTab('architecture')}
             className={`px-3 py-1.5 rounded-lg transition-all ${
-              activeTab === 'architecture' ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm' : 'hover:text-white hover:bg-white/5'
+              activeTab === 'architecture' ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm' : isLight ? 'hover:text-slate-900 hover:bg-slate-200/60' : 'hover:text-white hover:bg-white/5'
             }`}
           >
             Technical & Flowcharts
@@ -75,18 +87,31 @@ export default function LandingPage({ onGetStarted, onLogin }) {
           <button
             onClick={() => setActiveTab('uniqueness')}
             className={`px-3 py-1.5 rounded-lg transition-all ${
-              activeTab === 'uniqueness' ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm' : 'hover:text-white hover:bg-white/5'
+              activeTab === 'uniqueness' ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm' : isLight ? 'hover:text-slate-900 hover:bg-slate-200/60' : 'hover:text-white hover:bg-white/5'
             }`}
           >
             Why SyncCore?
           </button>
         </div>
 
-        {/* Right Action Buttons */}
+        {/* Right Action Buttons & Theme Switch */}
         <div className="flex items-center gap-2.5">
           <button
+            onClick={toggleTheme}
+            title={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+            className={`p-2 rounded-lg border transition-all ${
+              isLight
+                ? 'bg-slate-100 border-slate-200 text-amber-600 hover:bg-amber-100/60'
+                : 'bg-white/5 border-white/10 text-amber-400 hover:bg-white/10'
+            }`}
+          >
+            {isLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </button>
+          <button
             onClick={onLogin}
-            className="text-xs font-semibold text-slate-300 hover:text-white px-3 py-1.5 transition-colors"
+            className={`text-xs font-semibold px-3 py-1.5 transition-colors ${
+              isLight ? 'text-slate-700 hover:text-slate-900' : 'text-slate-300 hover:text-white'
+            }`}
           >
             Log in
           </button>
@@ -99,6 +124,7 @@ export default function LandingPage({ onGetStarted, onLogin }) {
           </button>
         </div>
       </nav>
+
 
       {/* Hero Header */}
       <header className="relative pt-12 pb-14 px-6 max-w-6xl mx-auto text-center space-y-6">

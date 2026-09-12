@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TeamProvider, useTeam } from './context/TeamContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import LandingPage from './components/LandingPage';
 import Sidebar from './components/Sidebar';
 import ChatPanel from './components/ChatPanel';
@@ -13,6 +14,7 @@ import TeamModal from './components/TeamModal';
 function MainApp() {
   const { user, loading } = useAuth();
   const { activeTab } = useTeam();
+  const { theme } = useTheme();
 
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
@@ -20,7 +22,9 @@ function MainApp() {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen bg-[#050505] flex items-center justify-center text-xs text-emerald-400 font-semibold tracking-wider uppercase">
+      <div className={`h-screen w-screen flex items-center justify-center text-xs font-semibold tracking-wider uppercase ${
+        theme === 'light' ? 'bg-[#f8fafc] text-emerald-700' : 'bg-[#050505] text-emerald-400'
+      }`}>
         Initializing SyncCore Platform...
       </div>
     );
@@ -45,7 +49,9 @@ function MainApp() {
 
   // Authenticated user -> Show Workspace Dashboard
   return (
-    <div className="flex h-screen w-screen bg-[#050505] text-white overflow-hidden">
+    <div className={`flex h-screen w-screen overflow-hidden ${
+      theme === 'light' ? 'bg-[#f8fafc] text-slate-900' : 'bg-[#050505] text-white'
+    }`}>
       {/* Sidebar */}
       <Sidebar
         onOpenMemberModal={() => setIsMemberModalOpen(true)}
@@ -75,10 +81,13 @@ function MainApp() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <TeamProvider>
-        <MainApp />
-      </TeamProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <TeamProvider>
+          <MainApp />
+        </TeamProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
+
