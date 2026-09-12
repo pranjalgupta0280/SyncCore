@@ -1,0 +1,151 @@
+================================================================================
+                       SYNCCORE - PLATFORM EXPLANATION & ARCHITECTURE FLOWCHARTS
+================================================================================
+
+1. PROJECT OVERVIEW
+--------------------------------------------------------------------------------
+SyncCore is an enterprise-grade, pitch-black real-time team collaboration and 
+analytics platform. It unifies project management, granular task assignment, 
+contextual real-time messaging, and live database aggregation metrics into a single 
+high-performance workspace.
+
+--------------------------------------------------------------------------------
+2. KEY FEATURES
+--------------------------------------------------------------------------------
+- Real-Time Team Channels & Direct Messages (Socket.io WebSocket synchronization)
+- Kanban Workspaces & Subtask Delegation with multi-member collaboration
+- Granular Role-Based Access Control (RBAC): Admin vs Assignee/Collaborator rights
+- Base64 Client-Compressed Image Attachments with built-in Lightbox zoom
+- Live MongoDB Aggregation Analytics for team throughput, efficiency & workload
+
+--------------------------------------------------------------------------------
+3. ADMIN VS USER WORKFLOWS & ACCESS MATRIX
+--------------------------------------------------------------------------------
+
+[ ADMIN WORKFLOW ]
+1. Create Team Workspace -> Becomes Workspace Owner / Admin
+2. Invite Members via @username handles into the workspace
+3. Create Projects and Subtasks with single Primary Assignee & Multiple Collaborators
+4. Manage workspace member roles (Promote to Admin / Remove Member)
+5. Full access to edit/delete any task or status across the workspace
+
+[ REGULAR MEMBER / USER WORKFLOW ]
+1. Join Workspace via invitation
+2. Participate in #general channel and 1-on-1 Direct Messages (DMs)
+3. Update Status of subtasks where user is Primary Assignee or Collaborator
+4. View real-time workload and velocity analytics on Analytics Board
+
++-------------------------------------+------------------+---------------------+
+| Action / Resource                   | Admin            | Assignee/Collab     |
++-------------------------------------+------------------+---------------------+
+| Create Project / Task               | YES              | NO                  |
+| Invite / Remove Workspace Members   | YES              | NO                  |
+| Update Assigned Task Status         | YES              | YES (Assigned Only) |
+| Update Unassigned Task Status       | YES              | NO (Restricted)     |
+| Send Real-Time Chat & Images        | YES              | YES                 |
+| View MongoDB Analytics Dashboard    | YES              | YES                 |
++-------------------------------------+------------------+---------------------+
+
+--------------------------------------------------------------------------------
+4. TECHNICAL ARCHITECTURE & FLOWCHARTS
+--------------------------------------------------------------------------------
+
+FLOWCHART 1: SYSTEM ARCHITECTURE OVERVIEW
+--------------------------------------------------------------------------------
+
+   +------------------------------------------------------------------+
+   |                    React 18 + Vite Frontend                      |
+   |   [ AuthContext ]   [ TeamContext ]   [ Tailwind Pitch-Black ]   |
+   +-------------------------------+----------------------------------+
+                                   |
+                     +-------------+-------------+
+                     |                           |
+            (HTTP REST Requests)          (WebSocket Events)
+                     |                           |
+                     v                           v
+          +--------------------+       +--------------------+
+          | Express 5 API      |       | Socket.io Engine   |
+          | - JWT Auth Guard   |       | - JWT Auth Handshake|
+          | - RBAC Guard       |       | - Room join/leave  |
+          | - Aggregation API  |       | - Broadcast Events |
+          +---------+----------+       +---------+----------+
+                    |                            |
+                    +--------------+-------------+
+                                   |
+                                   v
+                   +-------------------------------+
+                   | MongoDB Atlas / Mongoose DB   |
+                   | - Users, Teams, Projects      |
+                   | - Aggregation Pipelines       |
+                   +-------------------------------+
+
+FLOWCHART 2: AUTHENTICATION & SOCKET HANDSHAKE FLOW
+--------------------------------------------------------------------------------
+
+ [ Client User ]                [ Server Express ]               [ Socket.io Server ]
+        |                               |                                |
+        |--- 1. POST /api/auth/login -->|                                |
+        |    (Email & Password)         |                                |
+        |                               |-- Verify Bcrypt Hash           |
+        |<-- 2. Return JWT Token -------|                                |
+        |                                                                |
+        |--- 3. Connect Socket with auth.token ------------------------->|
+        |                                                                |-- Verify JWT Token
+        |                                                                |-- Join User Room (user._id)
+        |<-- 4. Socket Connected ("authenticated") ----------------------|
+
+FLOWCHART 3: TASK ROLE-BASED ACCESS CONTROL (RBAC) GUARD
+--------------------------------------------------------------------------------
+
+ User attempts to PATCH /api/projects/:projectId/subtasks/:subtaskId
+                               |
+                               v
+                     [ Fetch Subtask & Team ]
+                               |
+                               v
+              Is User Workspace Admin OR Primary Assignee OR Collaborator?
+                               |
+                   +-----------+-----------+
+                   |                       |
+                  YES                      NO
+                   |                       |
+                   v                       v
+         [ Update Subtask Status ]    [ Return 403 Forbidden ]
+         [ Emit WebSocket Event ]     [ Show Permission Toast ]
+         [ Return 200 OK Success ]
+
+FLOWCHART 4: MONGO DB AGGREGATION ANALYTICS PIPELINE
+--------------------------------------------------------------------------------
+
+ [ GET /api/analytics/teams/:teamId/stats ]
+                      |
+                      v
+       +---------------------------------------------+
+       | Pipeline Stage 1: $match team projects      |
+       +----------------------+----------------------+
+                              |
+                              v
+       +---------------------------------------------+
+       | Pipeline Stage 2: $unwind subtasks array   |
+       +----------------------+----------------------+
+                              |
+                              v
+       +---------------------------------------------+
+       | Pipeline Stage 3: $group & compute metrics  |
+       | - Completion Rate ($cond completed / total) |
+       | - Member Workload ($setUnion assignee/collab)|
+       +----------------------+----------------------+
+                              |
+                              v
+                [ Return JSON Analytics Stats ]
+
+--------------------------------------------------------------------------------
+5. UNIQUENESS & STRATEGIC IMPORTANCE
+--------------------------------------------------------------------------------
+1. Pitch-Black Glassmorphic Design System: Focused, high-contrast dark theme.
+2. Low Latency Real-time Engine: Sub-50ms instant socket propagation for chat & tasks.
+3. Multi-Member Subtask Delegation: Allows true collaborative work assignment.
+4. Database-Native Aggregations: Real-time efficiency and workload metrics computed 
+   directly inside MongoDBAtlas without heavy in-memory server processing.
+5. Strict RBAC Integrity: Full security enforcement preventing unauthorized status manipulation.
+================================================================================
