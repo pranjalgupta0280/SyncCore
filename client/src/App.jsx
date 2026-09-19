@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TeamProvider, useTeam } from './context/TeamContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -10,6 +10,7 @@ import AnalyticsPanel from './components/AnalyticsPanel';
 import AuthModal from './components/AuthModal';
 import MemberModal from './components/MemberModal';
 import TeamModal from './components/TeamModal';
+import OnboardingTour from './components/OnboardingTour';
 
 function MainApp() {
   const { user, loading } = useAuth();
@@ -19,6 +20,21 @@ function MainApp() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
+
+  // Auto-start onboarding tour for new signups / users who haven't completed it
+  useEffect(() => {
+    if (user) {
+      const userId = user._id || user.id;
+      const isNewSignup = sessionStorage.getItem('synccore_new_signup') === 'true';
+      const tourCompleted = localStorage.getItem(`synccore_onboarding_completed_${userId}`);
+
+      if (isNewSignup || !tourCompleted) {
+        setIsTourOpen(true);
+        sessionStorage.removeItem('synccore_new_signup');
+      }
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -56,6 +72,7 @@ function MainApp() {
       <Sidebar
         onOpenMemberModal={() => setIsMemberModalOpen(true)}
         onOpenTeamModal={() => setIsTeamModalOpen(true)}
+        onStartTour={() => setIsTourOpen(true)}
       />
 
       {/* Main Content View */}
@@ -74,6 +91,12 @@ function MainApp() {
       <TeamModal
         isOpen={isTeamModalOpen}
         onClose={() => setIsTeamModalOpen(false)}
+      />
+
+      {/* New User Follow-Along Onboarding Tour */}
+      <OnboardingTour
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
       />
     </div>
   );

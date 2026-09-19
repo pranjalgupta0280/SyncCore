@@ -1,0 +1,56 @@
+================================================================================
+                       SYNCCORE - PROJECT DESCRIPTION
+================================================================================
+
+1. EXECUTIVE OVERVIEW
+--------------------------------------------------------------------------------
+SyncCore is an enterprise-grade, real-time team collaboration and workspace analytics platform built on the MERN stack (MongoDB, Express, React 18, Node.js) with Socket.io v4. SyncCore bridges the gap between instant team messaging, Kanban task management, fine-grained Role-Based Access Control (RBAC), and real-time MongoDB aggregation performance metrics.
+
+Designed with a high-performance Pitch-Black Glassmorphic UI aesthetic, SyncCore delivers ultra-fast, smooth user interactions with zero layout jank, responsive Socket.io real-time syncing, client-side image compression, and real-time team workload visibility.
+
+
+2. SYSTEM ARCHITECTURE & WORKFLOW FLOWCHART
+--------------------------------------------------------------------------------
+
+   +-------------------------------------------------------------------------+
+   |                             CLIENT (React 18)                           |
+   |   - Auth & Team Context   - Pitch-Black Tailwind v4 UI   - Canvas JS   |
+   +-------------------------------------------------------------------------+
+                     |                                   |
+         HTTP/REST (Axios + JWT)                  WebSocket (Socket.io)
+                     |                                   |
+                     v                                   v
+   +-------------------------------------------------------------------------+
+   |                             SERVER (Node.js)                            |
+   |   - Express 5 REST API    - JWT Handshake Auth       - Sockets Manager |
+   |   - Role Access Middleware - Error Handlers         - Room Broadcasts |
+   +-------------------------------------------------------------------------+
+                     |
+            Mongoose 9 Drivers
+                     |
+                     v
+   +-------------------------------------------------------------------------+
+   |                          DATABASE (MongoDB Atlas)                        |
+   |   - Users Model           - Teams & Members          - Message Stream   |
+   |   - Projects & Subtasks   - Real-Time Aggregation Pipelines           |
+   +-------------------------------------------------------------------------+
+
+[ Real-Time Data Flow Lifecycle ]
+(User Action) ---> (Client State Update) ---> (Socket Event Broadcast) ---> (Server Broadcast to Room) ---> (Peer UI Instant Sync)
+
+
+3. CORE FEATURES & CAPABILITIES
+--------------------------------------------------------------------------------
+- Real-Time Messaging & Media: Public channel broadcasting (#general) and 1-on-1 direct messaging (@username). Includes inline canvas image compression and instant light-box zoom previews.
+- Kanban Workspace Management: Dynamic board columns (To Do, In Progress, Completed) for subtasks with single primary assignees and multi-member collaborator support.
+- Role-Based Access Control (RBAC): Strict permission boundaries where only workspace admins can create projects/subtasks, and status updates are guarded exclusively for admins, assignees, or collaborators.
+- MongoDB Aggregation Analytics: Live completion rate pipelines ($project, $cond, $divide) and member workload distribution graphs ($setUnion, $unwind).
+- Optimized Performance: Smooth CSS glassmorphism, hardware-accelerated transitions, lightweight bundle execution, and optimized state re-renders.
+
+
+4. TECHNICAL STACK
+--------------------------------------------------------------------------------
+- Frontend: React 18, Vite, Tailwind CSS v4, Lucide Icons, Axios, Socket.io Client.
+- Backend: Node.js, Express 5, Mongoose 9, Socket.io v4, Bcrypt.js, JSON Web Tokens.
+- Database: MongoDB Atlas / Local MongoDB Database.
+================================================================================

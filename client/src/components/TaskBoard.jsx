@@ -234,6 +234,7 @@ export default function TaskBoard() {
           {isTeamAdmin && (
             <button
               onClick={() => setShowAddProjectModal(true)}
+              data-tour="create-project"
               className="flex items-center gap-1 text-xs text-emerald-400 hover:bg-emerald-500/10 px-2.5 py-1.5 rounded-lg font-medium transition-colors"
             >
               <FolderPlus className="w-3.5 h-3.5" />
@@ -246,6 +247,7 @@ export default function TaskBoard() {
         {activeProject && isTeamAdmin && (
           <button
             onClick={() => setShowAddSubtaskModal(true)}
+            data-tour="create-subtask"
             className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition-all shadow-md shadow-emerald-600/20"
           >
             <Plus className="w-4 h-4" />

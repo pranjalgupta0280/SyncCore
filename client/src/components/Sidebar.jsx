@@ -15,9 +15,10 @@ import {
   Sparkles,
   Sun,
   Moon,
+  HelpCircle,
 } from 'lucide-react';
 
-export default function Sidebar({ onOpenMemberModal, onOpenTeamModal }) {
+export default function Sidebar({ onOpenMemberModal, onOpenTeamModal, onStartTour }) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const {
@@ -64,7 +65,7 @@ export default function Sidebar({ onOpenMemberModal, onOpenTeamModal }) {
           </div>
 
           {/* Active Team Dropdown Button */}
-          <div className="mt-3 relative">
+          <div className="mt-3 relative" data-tour="create-team">
             <button
               onClick={() => setShowTeamDropdown(!showTeamDropdown)}
               className={`w-full px-3 py-2 rounded-xl flex items-center justify-between text-xs font-semibold border transition-all ${
@@ -115,7 +116,7 @@ export default function Sidebar({ onOpenMemberModal, onOpenTeamModal }) {
         </div>
 
         {/* Navigation Tabs */}
-        <div className={`px-3 py-3 space-y-1 border-b ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+        <div className={`px-3 py-3 space-y-1 border-b ${isLight ? 'border-slate-200' : 'border-white/5'}`} data-tour="navigation-tabs">
           <button
             onClick={() => {
               setActiveTab('chat');
@@ -186,7 +187,8 @@ export default function Sidebar({ onOpenMemberModal, onOpenTeamModal }) {
             <button
               onClick={onOpenMemberModal}
               title="Add Member to Team"
-              className="text-slate-400 hover:text-emerald-500 transition-colors"
+              data-tour="add-member"
+              className="text-slate-400 hover:text-emerald-500 transition-colors p-1 rounded hover:bg-emerald-500/10"
             >
               <UserPlus className="w-3.5 h-3.5" />
             </button>
@@ -246,6 +248,18 @@ export default function Sidebar({ onOpenMemberModal, onOpenTeamModal }) {
         </div>
 
         <div className="flex items-center gap-1">
+          {onStartTour && (
+            <button
+              onClick={onStartTour}
+              title="Start Onboarding Tour"
+              className={`p-1.5 rounded-lg transition-colors ${
+                isLight ? 'text-emerald-600 hover:bg-emerald-100' : 'text-emerald-400 hover:bg-emerald-400/10'
+              }`}
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+          )}
+
           <button
             onClick={toggleTheme}
             title={isLight ? 'Switch to Pitch Black Dark Mode' : 'Switch to Light Mode'}

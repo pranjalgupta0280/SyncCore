@@ -1,0 +1,49 @@
+================================================================================
+                    SYNCCORE - USER ONBOARDING TOUR FLOWCHART
+================================================================================
+
+ [ User Logs In / Opens App ]
+             │
+             ▼
+  ┌──────────────────────┐
+  │ Tour Triggered?      │ ◄─── (Auto-starts if first login OR user clicks "Guide")
+  └──────────┬───────────┘
+             │
+             ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │ STEP 1: Create Team                                     │
+  │ Highlight: [ + Create Team ] button in Sidebar          │
+  │ Prompt: "Click here to create your organization/team"   │
+  └──────────┬──────────────────────────────────────────────┘
+             │ (Next / Click)
+             ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │ STEP 2: Add Members                                     │
+  │ Highlight: [ + Invite / Add Member ] button             │
+  │ Prompt: "Add team members by email to collaborate"      │
+  └──────────┬──────────────────────────────────────────────┘
+             │ (Next / Click)
+             ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │ STEP 3: Create Project                                  │
+  │ Highlight: [ + New Project ] button in Sidebar          │
+  │ Prompt: "Organize your work into distinct projects"     │
+  └──────────┬──────────────────────────────────────────────┘
+             │ (Next / Click)
+             ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │ STEP 4: Create Task & Assign                            │
+  │ Highlight: [ + Add Task ] in Task Board                 │
+  │ Prompt: "Create tasks, set status, and assign members"  │
+  └──────────┬──────────────────────────────────────────────┘
+             │ (Next / Click)
+             ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │ STEP 5: Add Subtasks                                    │
+  │ Highlight: [ + Subtask ] inside Task Modal / Board      │
+  │ Prompt: "Break down complex tasks into smaller subtasks"│
+  └──────────┬──────────────────────────────────────────────┘
+             │
+             ▼
+  [ Onboarding Completed! ]
+================================================================================

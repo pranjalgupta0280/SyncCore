@@ -44,6 +44,7 @@ export const AuthProvider = ({ children }) => {
     if (res.data.success) {
       const userData = res.data.data;
       localStorage.setItem('synccore_token', userData.token);
+      sessionStorage.setItem('synccore_new_signup', 'true');
       setUser(userData);
       connectSocket(userData.token);
       return userData;
