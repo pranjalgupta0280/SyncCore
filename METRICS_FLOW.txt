@@ -1,0 +1,35 @@
+================================================================================
+               SYNCCORE - ANALYTICS & METRICS GRAPH PIPELINE FLOWCHART
+================================================================================
+
+ [ User Navigates to Performance Metrics Tab ]
+                       │
+                       ▼
+ ┌───────────────────────────────────────────────────────────┐
+ │ Fetch Real-Time Analytics from TeamContext                │
+ │ (summary, memberWorkload, weeklyCompletion, performance)  │
+ └─────────────────────────┬─────────────────────────────────┘
+                           │
+                           ▼
+            ┌─────────────────────────────┐
+            │ Check if Real Data Exists?  │
+            └──────────────┬──────────────┘
+                           │
+           ┌───────────────┴───────────────┐
+           ▼                               ▼
+    [ Real Data Available ]        [ No Real Data / Empty ]
+           │                               │
+           ▼                               ▼
+   Render Real Analytics          Inject Fallback Dummy Data
+   Metrics & Charts               (Demonstration Mode Indicator)
+           │                               │
+           └───────────────┬───────────────┘
+                           │
+                           ▼
+ ┌───────────────────────────────────────────────────────────┐
+ │ 1. Team Completion & Overdue Overview Cards               │
+ │ 2. Combined Performance Line Graph (Time vs Tasks)        │
+ │ 3. Member Workload Combined Bar Chart                     │
+ │ 4. Week-wise Team Task Completion Bar / Line Chart        │
+ └───────────────────────────────────────────────────────────┘
+================================================================================
