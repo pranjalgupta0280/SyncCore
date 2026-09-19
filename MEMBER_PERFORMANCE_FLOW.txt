@@ -1,0 +1,33 @@
+================================================================================
+         SYNCCORE - MULTI-MEMBER PERFORMANCE LINE GRAPH FLOWCHART
+================================================================================
+
+ [ User Views Performance Analytics Panel ]
+                     │
+                     ▼
+ ┌────────────────────────────────────────────────────────┐
+ │ Prepare Multi-Member Performance Data                 │
+ │ (Member 1, Member 2, Member 3, Member 4 timelines)     │
+ └───────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+      ┌─────────────────────────────┐
+      │ Real Workspace Data Exists? │
+      └──────────────┬──────────────┘
+                     │
+     ┌───────────────┴───────────────┐
+     ▼                               ▼
+ [ Real Data Available ]     [ Empty / Demo Mode ]
+ Load Member Subtasks        Use Multi-Member Sample Timelines
+ Completed over Time         (Alex, Sarah, David, Elena)
+     │                               │
+     └───────────────┬───────────────┘
+                     │
+                     ▼
+ ┌────────────────────────────────────────────────────────┐
+ │ Render Multi-Member Line Chart                         │
+ │ 1. Unique SVG color path per member                    │
+ │ 2. Interactive legend hover/toggle                     │
+ │ 3. Unified X-Axis (Days/Weeks) vs Y-Axis (Tasks)       │
+ └────────────────────────────────────────────────────────┘
+================================================================================

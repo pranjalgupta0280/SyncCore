@@ -10,9 +10,10 @@ import {
   Calendar,
   Activity,
   Info,
+  LineChart as LineChartIcon,
 } from 'lucide-react';
 
-// Fallback Dummy Datasets (Used when real workspace data is empty or no team is selected)
+// Fallback Dummy Datasets
 const DUMMY_TIMELINE_DATA = [
   { time: 'Mon', completed: 4, created: 6 },
   { time: 'Tue', completed: 8, created: 7 },
@@ -21,6 +22,29 @@ const DUMMY_TIMELINE_DATA = [
   { time: 'Fri', completed: 19, created: 15 },
   { time: 'Sat', completed: 22, created: 18 },
   { time: 'Sun', completed: 28, created: 20 },
+];
+
+const DUMMY_MEMBER_LINES = [
+  {
+    name: 'Alex Rivera',
+    color: '#10b981',
+    history: [2, 5, 8, 12, 16, 20, 24],
+  },
+  {
+    name: 'Sarah Chen',
+    color: '#6366f1',
+    history: [3, 7, 11, 15, 21, 26, 29],
+  },
+  {
+    name: 'David Kim',
+    color: '#f59e0b',
+    history: [1, 3, 6, 8, 11, 14, 17],
+  },
+  {
+    name: 'Elena Rostova',
+    color: '#ec4899',
+    history: [2, 4, 9, 13, 18, 22, 26],
+  },
 ];
 
 const DUMMY_MEMBER_BAR_DATA = [
@@ -39,14 +63,16 @@ const DUMMY_WEEKLY_DATA = [
   { week: 'Week 6', completed: 40, target: 35 },
 ];
 
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
 export default function AnalyticsPanel() {
   const { activeTeam, analytics } = useTeam();
   const [hoveredPoint, setHoveredPoint] = useState(null);
+  const [activeMemberFilter, setActiveMemberFilter] = useState(null);
 
   const realSummary = analytics?.summary;
   const realMemberWorkload = analytics?.memberWorkload || [];
 
-  // Always use fallback dummy data if no team selected or no member workload yet
   const isUsingDummyData = !activeTeam || !realSummary || realMemberWorkload.length === 0;
 
   const summary = isUsingDummyData
@@ -69,11 +95,27 @@ export default function AnalyticsPanel() {
         color: mw.avatarColor || '#10b981',
       }));
 
+  const memberLinesData = isUsingDummyData
+    ? DUMMY_MEMBER_LINES
+    : realMemberWorkload.map((mw) => ({
+        name: mw.name,
+        color: mw.avatarColor || '#10b981',
+        history: [
+          Math.max(0, Math.round(mw.completed * 0.1)),
+          Math.max(0, Math.round(mw.completed * 0.25)),
+          Math.max(0, Math.round(mw.completed * 0.4)),
+          Math.max(0, Math.round(mw.completed * 0.6)),
+          Math.max(0, Math.round(mw.completed * 0.75)),
+          Math.max(0, Math.round(mw.completed * 0.9)),
+          mw.completed,
+        ],
+      }));
+
   const timelineData = DUMMY_TIMELINE_DATA;
   const weeklyData = DUMMY_WEEKLY_DATA;
 
-  // Max scale calculations for SVG graphs
   const maxTimelineTasks = Math.max(...timelineData.map((d) => Math.max(d.completed, d.created)), 1);
+  const maxMemberTasks = Math.max(...memberLinesData.flatMap((m) => m.history), 1);
   const maxBarVal = Math.max(...barData.map((b) => Math.max(b.assigned, b.completed)), 1);
   const maxWeeklyVal = Math.max(...weeklyData.map((w) => Math.max(w.completed, w.target)), 1);
 
@@ -168,13 +210,143 @@ export default function AnalyticsPanel() {
         </div>
       </div>
 
-      {/* Graph 1: Combined Performance Line Graph (Time vs Tasks) */}
+      {/* NEW GRAPH: Individual Member Performance Lines (Time vs Tasks per Member) */}
+      <div className="bg-[#0D0D0D] border border-white/10 rounded-2xl p-6 shadow-xl space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <LineChartIcon className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-sm font-bold text-white">
+              Individual Member Performance Timeline (Multi-Line Chart)
+            </h3>
+          </div>
+
+          {/* Interactive Member Line Filter Legend */}
+          <div className="flex items-center gap-2 overflow-x-auto">
+            <button
+              onClick={() => setActiveMemberFilter(null)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                activeMemberFilter === null
+                  ? 'bg-white/10 text-white border border-white/20'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              All Members
+            </button>
+            {memberLinesData.map((m, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveMemberFilter(activeMemberFilter === m.name ? null : m.name)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all border ${
+                  activeMemberFilter === m.name
+                    ? 'bg-white/10 text-white border-white/30'
+                    : 'text-slate-400 hover:text-white border-transparent'
+                }`}
+              >
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: m.color }} />
+                <span>{m.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Multi-Line SVG Chart */}
+        <div className="relative h-64 w-full pt-4">
+          <svg className="w-full h-full overflow-visible" viewBox="0 0 700 200">
+            {/* Horizontal Grid lines */}
+            {[0, 50, 100, 150].map((yVal, idx) => (
+              <line
+                key={idx}
+                x1="40"
+                y1={yVal}
+                x2="690"
+                y2={yVal}
+                stroke="rgba(255,255,255,0.05)"
+                strokeDasharray="4 4"
+              />
+            ))}
+
+            {/* X-Axis Day Labels */}
+            {DAYS.map((day, i) => {
+              const x = 40 + i * (650 / (DAYS.length - 1));
+              return (
+                <text key={i} x={x} y="190" fill="#94a3b8" fontSize="11" textAnchor="middle">
+                  {day}
+                </text>
+              );
+            })}
+
+            {/* Member Performance Lines */}
+            {memberLinesData.map((m, mIdx) => {
+              const isDimmed = activeMemberFilter && activeMemberFilter !== m.name;
+              const points = m.history.map((val, i) => {
+                const x = 40 + i * (650 / (DAYS.length - 1));
+                const y = 170 - (val / maxMemberTasks) * 140;
+                return { x, y, val, day: DAYS[i] };
+              });
+
+              const linePath = points.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(' ');
+
+              return (
+                <g key={mIdx} className="transition-opacity duration-300" style={{ opacity: isDimmed ? 0.15 : 1 }}>
+                  <path
+                    d={linePath}
+                    fill="none"
+                    stroke={m.color}
+                    strokeWidth={activeMemberFilter === m.name ? '4' : '2.5'}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {points.map((p, pIdx) => (
+                    <circle
+                      key={pIdx}
+                      cx={p.x}
+                      cy={p.y}
+                      r={activeMemberFilter === m.name ? '6' : '4'}
+                      fill={m.color}
+                      className="cursor-pointer transition-transform hover:scale-150"
+                      onMouseEnter={() =>
+                        setHoveredPoint({
+                          x: p.x,
+                          y: p.y,
+                          memberName: m.name,
+                          color: m.color,
+                          day: p.day,
+                          tasks: p.val,
+                        })
+                      }
+                      onMouseLeave={() => setHoveredPoint(null)}
+                    />
+                  ))}
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Member Line Tooltip */}
+          {hoveredPoint && hoveredPoint.memberName && (
+            <div
+              className="absolute z-30 bg-slate-900 border border-slate-700 p-2.5 rounded-xl shadow-2xl text-xs text-white pointer-events-none transform -translate-x-1/2 -translate-y-full"
+              style={{ left: `${(hoveredPoint.x / 700) * 100}%`, top: `${(hoveredPoint.y / 200) * 100}%` }}
+            >
+              <p className="font-bold mb-0.5 flex items-center gap-1.5" style={{ color: hoveredPoint.color }}>
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: hoveredPoint.color }} />
+                {hoveredPoint.memberName}
+              </p>
+              <p className="text-slate-300">
+                {hoveredPoint.day}: <strong className="text-white">{hoveredPoint.tasks} tasks completed</strong>
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Graph 1: Combined Performance Line Graph (Time vs Tasks Total) */}
       <div className="bg-[#0D0D0D] border border-white/10 rounded-2xl p-6 shadow-xl space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-emerald-400" />
             <h3 className="text-sm font-bold text-white">
-              Combined Team Performance (Time vs Task Completion Volume)
+              Combined Team Total Performance (Time vs Task Completion Volume)
             </h3>
           </div>
           <div className="flex items-center gap-4 text-xs">
@@ -284,7 +456,7 @@ export default function AnalyticsPanel() {
           </svg>
 
           {/* Floating Tooltip */}
-          {hoveredPoint && (
+          {hoveredPoint && !hoveredPoint.memberName && (
             <div
               className="absolute z-30 bg-slate-900 border border-emerald-500/40 p-2.5 rounded-xl shadow-2xl text-xs text-white pointer-events-none transform -translate-x-1/2 -translate-y-full"
               style={{ left: `${(hoveredPoint.x / 700) * 100}%`, top: `${(hoveredPoint.y / 200) * 100}%` }}
